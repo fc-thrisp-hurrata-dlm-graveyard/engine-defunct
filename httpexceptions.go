@@ -25,25 +25,9 @@ type (
 	HttpExceptions map[int]*HttpException
 )
 
-func defaulthttpexceptions() HttpExceptions {
-	httpexceptions := make(HttpExceptions)
-	httpexceptions.add(newhttpexception(400, "The browser (or proxy) sent a request that this server could not understand."))
-	httpexceptions.add(newhttpexception(401, "The server could not verify that you are authorized to access the URL requested.\nYou either supplied the wrong credentials (e.g. a bad password), or your browser doesn't understand how to supply the credentials required."))
-	httpexceptions.add(newhttpexception(403, "You do not have the permission to access the requested resource.\nIt is either read-protected or not readable by the server."))
-	httpexceptions.add(newhttpexception(404, "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again"))
-	httpexceptions.add(newhttpexception(405, "The method is not allowed for the requested URL."))
-	httpexceptions.add(newhttpexception(418, "This server is a teapot, not a coffee machine"))
-	httpexceptions.add(newhttpexception(500, "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application."))
-	httpexceptions.add(newhttpexception(502, "The proxy server received an invalid response from an upstream server."))
-	httpexceptions.add(newhttpexception(503, "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later."))
-	httpexceptions.add(newhttpexception(504, "The connection to an upstream server timed out."))
-	httpexceptions.add(newhttpexception(505, "The server does not support the HTTP protocol version used in the request"))
-	return httpexceptions
-}
-
-func newhttpexception(code int, message string) *HttpException {
+func NewHttpException(code int, message string) *HttpException {
 	n := &HttpException{code: code, message: message}
-	n.handlers = append(n.handlers, n.defaultexceptionpre(), n.defaultexceptionpost())
+	n.handlers = append(n.handlers, n.before(), n.after())
 	return n
 }
 
@@ -51,13 +35,13 @@ func (h *HttpException) name() string {
 	return http.StatusText(h.code)
 }
 
-func (h *HttpException) defaultexceptionpre() HandlerFunc {
+func (h *HttpException) before() HandlerFunc {
 	return func(c *Ctx) {
 		c.rw.WriteHeader(h.code)
 	}
 }
 
-func (h *HttpException) defaultexceptionpost() HandlerFunc {
+func (h *HttpException) after() HandlerFunc {
 	return func(c *Ctx) {
 		if !c.rw.Written() {
 			if c.rw.Status() == h.code {
@@ -74,7 +58,9 @@ func (h *HttpException) format() []byte {
 	return []byte(fmt.Sprintf(exceptionHtml, h.code, h.name(), h.name(), h.message))
 }
 
-func (h *HttpException) updatehandlers(handlers ...HandlerFunc) {
+// Adds any number of custom HandlerFunc to the HttpException, between the
+// default exception before & after handlers.
+func (h *HttpException) Update(handlers ...HandlerFunc) {
 	s := len(h.handlers) + len(handlers)
 	newh := make([]HandlerFunc, 0, s)
 	newh = append(newh, h.handlers[0])
@@ -86,54 +72,23 @@ func (h *HttpException) updatehandlers(handlers ...HandlerFunc) {
 	h.handlers = newh
 }
 
-func (hs HttpExceptions) add(h *HttpException) {
+func defaultHttpExceptions() HttpExceptions {
+	httpexceptions := make(HttpExceptions)
+	httpexceptions.New(NewHttpException(400, "The browser (or proxy) sent a request that this server could not understand."))
+	httpexceptions.New(NewHttpException(401, "The server could not verify that you are authorized to access the URL requested.\nYou either supplied the wrong credentials (e.g. a bad password), or your browser doesn't understand how to supply the credentials required."))
+	httpexceptions.New(NewHttpException(403, "You do not have the permission to access the requested resource.\nIt is either read-protected or not readable by the server."))
+	httpexceptions.New(NewHttpException(404, "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again"))
+	httpexceptions.New(NewHttpException(405, "The method is not allowed for the requested URL."))
+	httpexceptions.New(NewHttpException(418, "This server is a teapot, not a coffee machine"))
+	httpexceptions.New(NewHttpException(500, "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application."))
+	httpexceptions.New(NewHttpException(502, "The proxy server received an invalid response from an upstream server."))
+	httpexceptions.New(NewHttpException(503, "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later."))
+	httpexceptions.New(NewHttpException(504, "The connection to an upstream server timed out."))
+	httpexceptions.New(NewHttpException(505, "The server does not support the HTTP protocol version used in the request"))
+	return httpexceptions
+}
+
+// New creates a HttpException in the HttpExceptions map.
+func (hs HttpExceptions) New(h *HttpException) {
 	hs[h.code] = h
 }
-
-/*
-// A handler for engine.router NotFound handler
-func (engine *Engine) handler404(w http.ResponseWriter, req *http.Request) {
-	e := engine.HttpExceptions[404]
-	c := engine.getCtx(w, req, nil, engine.combineHandlers(e.handlers))
-	c.Next()
-	engine.cache.Put(c)
-}
-
-// A handler for engine.router Panic handler
-func (engine *Engine) handler500(w http.ResponseWriter, req *http.Request, err interface{}) {
-	e := engine.HttpExceptions[500]
-	e.updatehandlers(func(c *Ctx) {
-		stack := stack(3)
-		log.Printf("\n---------------------\nInternal Server Error\n---------------------\n%s\n---------------------\n%s\n---------------------\n", err, stack)
-		switch engine.Env.Mode {
-		case devmode:
-			c.rw.Header().Set("Content-Type", "text/html")
-			c.rw.Write([]byte(fmt.Sprintf(panicHtml, err, err, stack)))
-		}
-	})
-	c := engine.getCtx(w, req, nil, engine.combineHandlers(e.handlers))
-	c.Next()
-	engine.cache.Put(c)
-}
-
-// ExceptionHandler updates an existing HttpException, or if non-existent, creates
-// a new one, with the provided integer status code, message, and HandlerFuncs
-func (engine *Engine) ExceptionHandler(i int, message string, handlers ...HandlerFunc) {
-	if _, ok := engine.HttpExceptions[i]; !ok {
-		engine.HttpExceptions.add(newhttpexception(i, ""))
-	}
-	e := engine.HttpExceptions[i]
-	if message != "" {
-		e.message = message
-	}
-	e.updatehandlers(handlers...)
-}
-
-// UseExceptionHandler adds the provided HandlerFuncs to the given integer
-// HttpException in engine.HttpExceptions.
-func (engine *Engine) UseExceptionHandler(i int, handlers ...HandlerFunc) {
-	if e, ok := engine.HttpExceptions[i]; ok {
-		e.updatehandlers(handlers...)
-	}
-}
-*/

@@ -10,9 +10,8 @@ import (
 type (
 	Engine struct {
 		*Group
-		cache   sync.Pool
-		handler HandlerFunc
-		router  *router.Router
+		cache  sync.Pool
+		router *router.Router
 	}
 )
 
@@ -26,13 +25,10 @@ func New() *Engine {
 
 // ServeHTTP makes the engine implement the http.Handler interface.
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	// router lookup
-	// do stuff
-	// engine.router.ServeHTTP(w, req)
+	engine.router.ServeHTTP(w, req)
 }
 
 func (engine *Engine) Run(addr string) {
-	//engine.init()
 	if err := http.ListenAndServe(addr, engine); err != nil {
 		panic(err)
 	}
