@@ -1,3 +1,3 @@
-Engine is tools and help for building web frameworks in Go.
+Engine is a core to drive a Go web framework.
 
 https://thrisp.github.io/engine/
