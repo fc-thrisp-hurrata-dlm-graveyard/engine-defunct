@@ -10,9 +10,9 @@ import (
 type (
 	Engine struct {
 		*Group
-		cache sync.Pool
-		//Handler Handlerfunc
-		router *router.Router
+		cache   sync.Pool
+		handler HandlerFunc
+		router  *router.Router
 	}
 )
 
@@ -20,7 +20,7 @@ type (
 func New() *Engine {
 	engine := &Engine{router: router.New()}
 	engine.Group = NewGroup("/", engine)
-	engine.cache.New = engine.newCtx
+	engine.cache.New = engine.newContext
 	return engine
 }
 

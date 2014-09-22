@@ -1,15 +1,17 @@
 package engine
 
 import (
+	"lcl/engine/router"
 	"net/http"
 	"path/filepath"
 )
 
 type (
 	Group struct {
+		prefix   string
 		engine   *Engine
 		parent   *Group
-		children []*RouterGroup
+		children []*Group
 		HttpExceptions
 	}
 )
@@ -28,18 +30,19 @@ func NewGroup(prefix string, engine *Engine) *Group {
 	return &Group{}
 }
 
-func (g *Group) New(component string) *Group {
+func (group *Group) New(component string) *Group {
 	prefix := group.pathFor(component)
 	newgroup := NewGroup(prefix, group.engine)
-	newrgroup.parent = group
+	newgroup.parent = group
+	return newgroup
 }
 
 func (group *Group) Handle(route string, method string) {
-	routepath = group.pathFor(route)
-	group.engine.router.Handle(method, routepath, func(w http.ResponseWriter, req *http.Request, params router.Params) {
-		c := group.engine.getCtx(w, req, params)
+	route = group.pathFor(route)
+	group.engine.router.Handle(method, route, func(w http.ResponseWriter, req *http.Request, params router.Params) {
+		c := group.engine.getContext(w, req, params)
 		c.currentgroup = group
-		c.handler()
+		c.handler(c)
 		group.engine.cache.Put(c)
 	})
 }

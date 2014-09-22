@@ -1,6 +1,9 @@
 package engine
 
-import "net/http"
+import (
+	"lcl/engine/router"
+	"net/http"
+)
 
 type (
 	HandlerFunc func(*Ctx)
@@ -12,17 +15,17 @@ type (
 		rwmem        responseWriter
 		rw           ResponseWriter
 		Request      *http.Request
-		Errors       errorMsgs
+		//Errors       errorMsgs
 	}
 )
 
 func (engine *Engine) newContext() interface{} {
-	c := &Ctx{engine: engine, handler: engine.Handler}
+	c := &Ctx{engine: engine, handler: engine.handler}
 	c.rw = &c.rwmem
 	return c
 }
 
-func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request, params httprouter.Params) *Ctx {
+func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request, params router.Params) *Ctx {
 	c := engine.cache.Get().(*Ctx)
 	c.rwmem.reset(w)
 	c.Request = req
