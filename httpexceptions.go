@@ -37,18 +37,18 @@ func (h *HttpException) name() string {
 
 func (h *HttpException) before() HandlerFunc {
 	return func(c *Ctx) {
-		c.rw.WriteHeader(h.code)
+		c.RW.WriteHeader(h.code)
 	}
 }
 
 func (h *HttpException) after() HandlerFunc {
 	return func(c *Ctx) {
-		if !c.rw.Written() {
-			if c.rw.Status() == h.code {
-				c.rw.Header().Set("Content-Type", "text/html")
-				c.rw.Write(h.format())
+		if !c.RW.Written() {
+			if c.RW.Status() == h.code {
+				c.RW.Header().Set("Content-Type", "text/html")
+				c.RW.Write(h.format())
 			} else {
-				c.rw.WriteHeaderNow()
+				c.RW.WriteHeaderNow()
 			}
 		}
 	}

@@ -15,7 +15,7 @@ type (
 		engine  *Engine
 		group   *Group
 		rwmem   responseWriter
-		rw      ResponseWriter
+		RW      ResponseWriter
 		Request *http.Request
 		Params  router.Params
 		// Form
@@ -26,7 +26,7 @@ type (
 
 func (engine *Engine) newContext() interface{} {
 	c := &Ctx{engine: engine}
-	c.rw = &c.rwmem
+	c.RW = &c.rwmem
 	return c
 }
 
@@ -74,7 +74,7 @@ func (c *Ctx) LastError() error {
 // Immediately abort the context writing out the code to the response
 func (c *Ctx) Abort(code int) {
 	if code >= 0 {
-		c.rw.WriteHeader(code)
+		c.RW.WriteHeader(code)
 	}
 }
 

@@ -138,18 +138,18 @@ func (r *Router) HandlerFunc(method, path string, handler http.HandlerFunc) {
 // To use the operating system's file system implementation,
 // use http.Dir:
 //     router.ServeFiles("/src/*filepath", http.Dir("/var/www"))
-func (r *Router) ServeFiles(path string, root http.FileSystem) {
-	if len(path) < 10 || path[len(path)-10:] != "/*filepath" {
-		panic("path must end with /*filepath")
-	}
-
-	fileServer := http.FileServer(root)
-
-	r.GET(path, func(w http.ResponseWriter, req *http.Request, ps Params) {
-		req.URL.Path = ps.ByName("filepath")
-		fileServer.ServeHTTP(w, req)
-	})
-}
+//func (r *Router) ServeFiles(path string, root http.FileSystem) {
+//	if len(path) < 10 || path[len(path)-10:] != "/*filepath" {
+//		panic("path must end with /*filepath")
+//	}
+//
+//	fileServer := http.FileServer(root)
+//
+//	r.GET(path, func(w http.ResponseWriter, req *http.Request, ps Params) {
+//		req.URL.Path = ps.ByName("filepath")
+//		fileServer.ServeHTTP(w, req)
+//	})
+//}
 
 func (r *Router) recv(w http.ResponseWriter, req *http.Request) {
 	if rcv := recover(); rcv != nil {
