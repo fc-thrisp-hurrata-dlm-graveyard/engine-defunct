@@ -1,8 +1,6 @@
 package router
 
-import (
-	"net/http"
-)
+import "net/http"
 
 var (
 	// Make sure the Router conforms with the http.Handler interface
@@ -104,7 +102,6 @@ func (r *Router) Handle(method, path string, handle Handle) {
 		root = new(node)
 		r.trees[method] = root
 	}
-
 	root.addRoute(path, handle)
 }
 
