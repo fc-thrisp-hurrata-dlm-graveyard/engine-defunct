@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync"
 
-	"lcl/engine/router"
+	"github.com/thrisp/engine/router"
 )
 
 type (

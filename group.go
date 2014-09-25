@@ -1,9 +1,10 @@
 package engine
 
 import (
-	"lcl/engine/router"
 	"net/http"
 	"path/filepath"
+
+	"github.com/thrisp/engine/router"
 )
 
 type (

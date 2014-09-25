@@ -2,8 +2,9 @@ package engine
 
 import (
 	"errors"
-	"lcl/engine/router"
 	"net/http"
+
+	"github.com/thrisp/engine/router"
 )
 
 type (
