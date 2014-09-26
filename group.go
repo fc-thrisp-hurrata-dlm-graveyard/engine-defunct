@@ -17,7 +17,7 @@ type (
 )
 
 func (group *Group) pathFor(path string) string {
-	joined := filepath.Join(group.prefix, path)
+	joined := filepath.ToSlash(filepath.Join(group.prefix, path))
 	// Append a '/' if the last component had one, but only if it's not there already
 	if len(path) > 0 && path[len(path)-1] == '/' && joined[len(joined)-1] != '/' {
 		return joined + "/"
