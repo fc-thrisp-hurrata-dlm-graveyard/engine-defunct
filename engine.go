@@ -48,6 +48,7 @@ func New() *Engine {
 	engine.Group = NewGroup("/", engine)
 	engine.cache.New = engine.newContext
 	go engine.ReadSignal()
+	engine.SendSignal("new engine")
 	return engine
 }
 
