@@ -45,7 +45,7 @@ type (
 		// all other request methods.
 		// For example /FOO and /..//Foo could be redirected to /foo.
 		// RedirectTrailingSlash is independent of this option.
-		RedirectCleanedPath bool
+		RedirectFixedPath bool
 
 		// Configurable http.HandlerFunc which is called when no matching route is
 		// found. If it is not set, http.NotFound is used.
@@ -76,7 +76,7 @@ func (ps Params) ByName(name string) string {
 func New() *Router {
 	return &Router{
 		RedirectTrailingSlash: true,
-		RedirectCleanedPath:   true,
+		RedirectFixedPath:     true,
 	}
 }
 
@@ -154,59 +154,6 @@ func (r *Router) recv(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// RedirectIf attempts to redirect based on request information & trailing slash
-// redirect cue provided in previous getValue;
-func (r *Router) RedirectIf(w http.ResponseWriter, req *http.Request, tsrcue bool) {
-	path := req.URL.Path
-	if req.Method != "CONNECT" && path != "/" {
-		code := 301 // Permanent redirect, request with GET method
-		if req.Method != "GET" {
-			// Temporary redirect, request with same method
-			// As of Go 1.3, Go does not support status code 308.
-			code = 307
-		}
-
-		r.CleanPathRedirect(w, req, code)
-		r.TrailingSlashRedirect(w, req, code, tsrcue)
-	}
-}
-
-func (r *Router) CleanPathRedirect(w http.ResponseWriter, req *http.Request, code int) {
-	if root := r.getRoot(req.Method); root != nil {
-		// Try to fix the request path
-		if r.RedirectCleanedPath {
-			fixedPath, found := root.findCaseInsensitivePath(
-				CleanPath(req.URL.Path),
-				r.RedirectTrailingSlash,
-			)
-			if found {
-				req.URL.Path = string(fixedPath)
-				http.Redirect(w, req, req.URL.String(), code)
-			}
-		}
-	}
-}
-
-func (r *Router) TrailingSlashRedirect(w http.ResponseWriter, req *http.Request, code int, tsrcue bool) {
-	path := req.URL.Path
-	if tsrcue && r.RedirectTrailingSlash {
-		if path[len(path)-1] == '/' {
-			path = path[:len(path)-1]
-		} else {
-			path = path + "/"
-		}
-		http.Redirect(w, req, req.URL.String(), code)
-	}
-}
-
-func (r *Router) getRoot(method string) *node {
-	if root := r.trees[method]; root != nil {
-		return root
-	} else {
-		return nil
-	}
-}
-
 // Lookup allows the manual lookup of a method + path combo.
 func (r *Router) Lookup(method, path string) (Handle, Params, bool) {
 	if root := r.trees[method]; root != nil {
@@ -222,11 +169,40 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if root := r.trees[req.Method]; root != nil {
-		if handle, ps, tsrcue := root.getValue(req.URL.Path); handle != nil {
+		path := req.URL.Path
+		if handle, ps, tsr := root.getValue(path); handle != nil {
 			handle(w, req, ps)
 			return
-		} else {
-			r.RedirectIf(w, req, tsrcue)
+		} else if req.Method != "CONNECT" && path != "/" {
+			code := 301 // Permanent redirect, request with GET method
+			if req.Method != "GET" {
+				// Temporary redirect, request with same method
+				// As of Go 1.3, Go does not support status code 308.
+				code = 307
+			}
+
+			if tsr && r.RedirectTrailingSlash {
+				if path[len(path)-1] == '/' {
+					req.URL.Path = path[:len(path)-1]
+				} else {
+					req.URL.Path = path + "/"
+				}
+				http.Redirect(w, req, req.URL.String(), code)
+				return
+			}
+
+			// Try to fix the request path
+			if r.RedirectFixedPath {
+				fixedPath, found := root.findCaseInsensitivePath(
+					CleanPath(path),
+					r.RedirectTrailingSlash,
+				)
+				if found {
+					req.URL.Path = string(fixedPath)
+					http.Redirect(w, req, req.URL.String(), code)
+					return
+				}
+			}
 		}
 	}
 
