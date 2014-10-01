@@ -3,6 +3,7 @@ package engine
 import (
 	"errors"
 	"net/http"
+	"net/url"
 
 	"github.com/thrisp/engine/router"
 )
@@ -19,7 +20,7 @@ type (
 		RW      ResponseWriter
 		Request *http.Request
 		Params  router.Params
-		// Form
+		Form    url.Values
 		// Files
 		Errors errorMsgs
 	}
@@ -36,6 +37,8 @@ func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request, param
 	c.rwmem.reset(w)
 	c.Request = req
 	c.Params = params
+	req.ParseMultipartForm(engine.MaxFormMemory)
+	c.Form = req.Form
 	return c
 }
 
@@ -43,6 +46,7 @@ func (engine *Engine) putContext(c *Ctx) {
 	c.group = nil
 	c.Request = nil
 	c.Params = nil
+	c.Form = nil
 	engine.cache.Put(c)
 }
 
