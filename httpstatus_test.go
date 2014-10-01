@@ -8,7 +8,7 @@ import (
 
 func testCallException(code int, t *testing.T) {
 	e := New()
-	e.Handle("/test", "GET", func(c *Ctx) { c.Exception(code) })
+	e.Handle("/test", "GET", func(c *Ctx) { c.Status(code) })
 
 	w := PerformRequest(e, "GET", "/test")
 
@@ -26,8 +26,8 @@ func TestCallException(t *testing.T) {
 func testCustomException(code int, t *testing.T) {
 	result := fmt.Sprintf("CUSTOM %d", code)
 	e := New()
-	e.HttpExceptions[code].Update(func(c *Ctx) { c.rw.Write([]byte(result)) })
-	e.Handle("/test", "GET", func(c *Ctx) { c.Exception(code) })
+	e.HttpStatuses[code].Update(func(c *Ctx) { c.RW.Write([]byte(result)) })
+	e.Handle("/test", "GET", func(c *Ctx) { c.Status(code) })
 
 	w := PerformRequest(e, "GET", "/test")
 
@@ -44,3 +44,5 @@ func TestCustomException(t *testing.T) {
 	testCustomException(418, t)
 	testCustomException(500, t)
 }
+
+//func TestForce500(t *testing.T) {}

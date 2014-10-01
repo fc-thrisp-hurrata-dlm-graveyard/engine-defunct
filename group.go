@@ -12,7 +12,7 @@ type (
 		prefix string
 		engine *Engine
 		parent *Group
-		HttpExceptions
+		HttpStatuses
 	}
 )
 
@@ -29,8 +29,8 @@ func (group *Group) pathFor(path string) string {
 // a primary engine Group
 func NewGroup(prefix string, engine *Engine) *Group {
 	return &Group{prefix: prefix,
-		engine:         engine,
-		HttpExceptions: defaultHttpExceptions()}
+		engine:       engine,
+		HttpStatuses: defaultHttpStatuses()}
 }
 
 // New creates a group from an existing group using the component string as a

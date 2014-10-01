@@ -8,6 +8,8 @@ import (
 )
 
 type (
+	// Engine is the the core struct containing Groups, sync.Pool cache, and
+	// router, in addition to configuration options.
 	Engine struct {
 		*Group
 		cache  sync.Pool
@@ -15,9 +17,15 @@ type (
 	}
 )
 
+// Empty returns an empty Engine with no Router, for you to build up from.
+func Empty() *Engine {
+	return &Engine{}
+}
+
 // Returns a new engine, with the least configuration.
 func New() *Engine {
-	engine := &Engine{router: router.New()}
+	engine := Empty()
+	engine.router = router.New()
 	engine.Group = NewGroup("/", engine)
 	engine.cache.New = engine.newContext
 	return engine

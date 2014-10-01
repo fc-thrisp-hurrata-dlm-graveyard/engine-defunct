@@ -91,9 +91,9 @@ func (c *Ctx) Fail(code int, err error) {
 }
 
 // Calls an HttpException in the current group by integer code from the Context,
-// if the exception exists.
-func (c *Ctx) Exception(code int) {
-	if e, ok := c.group.HttpExceptions[code]; ok {
+// if the status exists.
+func (c *Ctx) Status(code int) {
+	if e, ok := c.group.HttpStatuses[code]; ok {
 		index := int8(0)
 		s := int8(len(e.handlers))
 		for ; index < s; index++ {

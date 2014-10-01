@@ -25,10 +25,11 @@ func methodNotMethod(method string) string {
 
 func testRouteOK(method string, t *testing.T) {
 	passed := false
-	r := New()
-	r.Handle("/test", method, func(c *Ctx) { passed = true })
+	e := New()
 
-	w := PerformRequest(r, method, "/test")
+	e.Handle("/test", method, func(c *Ctx) { passed = true })
+
+	w := PerformRequest(e, method, "/test")
 
 	if passed == false {
 		t.Errorf(method + " route handler was not invoked.")
@@ -49,11 +50,11 @@ func TestRouteOK(t *testing.T) {
 
 func testGroupOK(method string, t *testing.T) {
 	passed := false
-	r := New()
+	e := New()
 
-	r.Handle("/test_group", method, func(c *Ctx) { passed = true })
+	e.Handle("/test_group", method, func(c *Ctx) { passed = true })
 
-	w := PerformRequest(r, method, "/test_group")
+	w := PerformRequest(e, method, "/test_group")
 
 	if passed == false {
 		t.Errorf(method + " group route handler was not invoked.")
@@ -74,11 +75,11 @@ func TestGroupOK(t *testing.T) {
 
 func testSubGroupOK(method string, t *testing.T) {
 	passed := false
-	r := New()
-	g := r.New("/test_group")
+	e := New()
+	g := e.New("/test_group")
 	g.Handle("/test_group_subgroup", method, func(c *Ctx) { passed = true })
 
-	w := PerformRequest(r, method, "/test_group/test_group_subgroup")
+	w := PerformRequest(e, method, "/test_group/test_group_subgroup")
 
 	if passed == false {
 		t.Errorf(method + " group route handler was not invoked.")
@@ -99,11 +100,10 @@ func TestSubGroupOK(t *testing.T) {
 
 func testRouteNotOK(method string, t *testing.T) {
 	passed := false
-	r := New()
+	e := New()
 	othermethod := methodNotMethod(method)
-	r.Handle("/test_2", othermethod, func(c *Ctx) { passed = true })
-
-	w := PerformRequest(r, method, "/test")
+	e.Handle("/test_2", othermethod, func(c *Ctx) { passed = true })
+	w := PerformRequest(e, method, "/test")
 
 	if passed == true {
 		t.Errorf(method + " route handler was invoked, when it should not")
