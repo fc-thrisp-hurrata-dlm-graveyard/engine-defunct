@@ -22,33 +22,33 @@ type (
 	}
 
 	conf struct {
+		SignalsOn     bool
 		MaxFormMemory int64
 	}
 )
 
 func newconf() *conf {
 	return &conf{
+		SignalsOn:     false,
 		MaxFormMemory: 1000000,
 	}
 }
 
-// Empty returns an empty Engine with no Router, for you to build up from.
+// Empty returns an empty Engine with default configuration, to build up from.
 func Empty() *Engine {
-	return &Engine{
-		conf:    newconf(),
-		signals: make(signal, 1),
-		logger:  log.New(os.Stdout, "[Engine]", 0),
-	}
+	return &Engine{conf: newconf()}
 }
 
-// Returns a new engine, with the least configuration.
+// Returns a new engine, with the least, default configuration.
 func New() *Engine {
 	engine := Empty()
 	engine.router = router.New()
 	engine.Group = NewGroup("/", engine)
 	engine.cache.New = engine.newContext
+	engine.SignalsOn = true
+	engine.signals = make(signal, 1)
+	engine.logger = log.New(os.Stdout, "[Engine]", 0)
 	go engine.ReadSignal()
-	engine.SendSignal("new engine")
 	return engine
 }
 

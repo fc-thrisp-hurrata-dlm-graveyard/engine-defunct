@@ -5,6 +5,27 @@ import (
 	"unicode"
 )
 
+const (
+	static   nodeType = 0
+	param    nodeType = 1
+	catchAll nodeType = 2
+)
+
+type (
+	nodeType uint8
+
+	node struct {
+		path      string
+		wildChild bool
+		nType     nodeType
+		maxParams uint8
+		indices   []byte
+		children  []*node
+		handle    Handle
+		priority  uint32
+	}
+)
+
 func min(a, b int) int {
 	if a <= b {
 		return a
@@ -24,25 +45,6 @@ func countParams(path string) uint8 {
 		return 255
 	}
 	return uint8(n)
-}
-
-type nodeType uint8
-
-const (
-	static   nodeType = 0
-	param    nodeType = 1
-	catchAll nodeType = 2
-)
-
-type node struct {
-	path      string
-	wildChild bool
-	nType     nodeType
-	maxParams uint8
-	indices   []byte
-	children  []*node
-	handle    Handle
-	priority  uint32
 }
 
 // increments priority of the given child and reorders if necessary

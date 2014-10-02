@@ -102,6 +102,7 @@ func (r *Router) Handle(method string, path string, handle Handle) {
 		root = new(node)
 		r.trees[method] = root
 	}
+
 	root.addRoute(path, handle)
 }
 
