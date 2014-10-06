@@ -46,8 +46,7 @@ func (group *Group) New(component string) *Group {
 // Handle provides a route, method, and HandlerFunc to the router, and creates
 // a function using the handler when the router matches the route and method.
 func (group *Group) Handle(route string, method string, handler HandlerFunc) {
-	route = group.pathFor(route)
-	group.engine.router.Handle(method, route, func(w http.ResponseWriter, req *http.Request, params router.Params) {
+	group.engine.router.Handle(method, group.pathFor(route), func(w http.ResponseWriter, req *http.Request, params router.Params) {
 		c := group.engine.getContext(w, req, params)
 		c.group = group
 		handler(c)

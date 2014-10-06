@@ -24,18 +24,18 @@ func TestCallException(t *testing.T) {
 }
 
 func testCustomException(code int, t *testing.T) {
-	result := fmt.Sprintf("CUSTOM %d", code)
+	expected := fmt.Sprintf("CUSTOM %d", code)
 	e := New()
-	e.HttpStatuses[code].Update(func(c *Ctx) { c.RW.Write([]byte(result)) })
+	e.HttpStatuses[code].Update(func(c *Ctx) { c.RW.Write([]byte(expected)) })
 	e.Handle("/test", "GET", func(c *Ctx) { c.Status(code) })
 
 	w := PerformRequest(e, "GET", "/test")
 
-	if w.Body.String() != result {
-		t.Errorf("Body should be %s, was but was %s.", result, w.Body.String())
+	if w.Body.String() != expected {
+		t.Errorf("Body should be '%s', was but was '%s'.", expected, w.Body.String())
 	}
 	if w.Code != code {
-		t.Errorf("Status code should be %v, was %d", code, w.Code)
+		t.Errorf("Status code should be %d, was %d", code, w.Code)
 	}
 }
 
@@ -44,5 +44,3 @@ func TestCustomException(t *testing.T) {
 	testCustomException(418, t)
 	testCustomException(500, t)
 }
-
-//func TestForce500(t *testing.T) {}

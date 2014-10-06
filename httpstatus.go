@@ -44,7 +44,12 @@ func (h *HttpStatus) before() HandlerFunc {
 func (h *HttpStatus) after() HandlerFunc {
 	return func(c *Ctx) {
 		if !c.RW.Written() {
-			c.RW.WriteHeaderNow()
+			if c.engine.HTMLStatus {
+				c.RW.Header().Set("Content-Type", "text/html")
+				c.RW.Write(h.format())
+			} else {
+				c.RW.WriteHeaderNow()
+			}
 		}
 	}
 }

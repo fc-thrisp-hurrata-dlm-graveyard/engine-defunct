@@ -13,6 +13,8 @@ type (
 	// wildcar values.
 	Handle func(http.ResponseWriter, *http.Request, Params)
 
+	PHandle func(http.ResponseWriter, *http.Request, interface{})
+
 	// Param is a single URL parameter, consisting of a key and a value.
 	Param struct {
 		Key   string
@@ -56,7 +58,7 @@ type (
 		// 500 (Internal Server Error).
 		// The handler can be used to keep your server from crashing because of
 		// unrecovered panics.
-		PanicHandler func(http.ResponseWriter, *http.Request, interface{})
+		PanicHandler PHandle
 	}
 )
 
