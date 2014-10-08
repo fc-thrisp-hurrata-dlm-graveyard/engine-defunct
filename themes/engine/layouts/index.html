@@ -2,13 +2,16 @@
 <html>
     <body>
         <div class="container">
+        {{ template "theme/partials/sidebar.html" }}
+        <div id=e-right>
+            {{ template "theme/partials/logo.html" . }}
             <div id=e-content>
-                {{ template "theme/partials/logo.html" . }}
                 {{ range where .Data.Pages "Title" "engine-index"}}
                     {{ .Content}}<br>
-                {{ end }}
-                {{ template "theme/partials/footer.html" }}
+                {{ end }}    
             </div>
+        </div>
+        {{ template "theme/partials/footer.html" }}
         </div>
     </body>
 </html>
