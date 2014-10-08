@@ -29,7 +29,7 @@ type (
 		RedirectTrailingSlash bool
 		RedirectFixedPath     bool
 		HTMLStatus            bool
-		SignalsOn             bool
+		LoggingOn             bool
 		MaxFormMemory         int64
 	}
 )
@@ -40,7 +40,7 @@ func defaultconf() *conf {
 		RedirectTrailingSlash: true,
 		RedirectFixedPath:     true,
 		HTMLStatus:            false,
-		SignalsOn:             true,
+		LoggingOn:             true,
 		MaxFormMemory:         1000000,
 	}
 }
@@ -59,7 +59,7 @@ func New() *Engine {
 	engine.cache.New = engine.newContext
 	engine.signals = engine.NewSignaller()
 	engine.logger = log.New(os.Stdout, "[Engine]", 0)
-	go engine.ReadSignal()
+	go engine.LogSignal()
 	return engine
 }
 
@@ -140,7 +140,7 @@ func (e *Engine) rcvr(c *Ctx) {
 	}
 }
 
-func (e *Engine) notfound(c *Ctx) {
+func (e *Engine) ntfnd(c *Ctx) {
 	c.group = e.Group
 	c.Status(404)
 }
@@ -154,6 +154,7 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		if manage, ps, tsr := root.getValue(path); manage != nil {
 			c.Params = ps
 			manage(c)
+			engine.putContext(c)
 			return
 		} else if req.Method != "CONNECT" && path != "/" {
 			code := 301 // Permanent redirect, request with GET method
@@ -170,6 +171,7 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 					req.URL.Path = path + "/"
 				}
 				http.Redirect(w, req, req.URL.String(), code)
+				engine.putContext(c)
 				return
 			}
 
@@ -182,13 +184,14 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				if found {
 					req.URL.Path = string(fixedPath)
 					http.Redirect(w, req, req.URL.String(), code)
+					engine.putContext(c)
 					return
 				}
 			}
 		}
 	}
 
-	engine.notfound(c)
+	engine.ntfnd(c)
 	engine.putContext(c)
 }
 

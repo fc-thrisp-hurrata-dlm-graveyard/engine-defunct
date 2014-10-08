@@ -125,14 +125,16 @@ func defaultHttpStatuses() HttpStatuses {
 	return hss
 }
 
+// PanicHandler is called with Http status 500 that gets all ErrorTypePanic from
+// *Ctx.Errors, sends them as a signal if engine has SignalsOn set true, or logs
+// to stdout if not, and and serves a basic html page if engine ServePanic is true.
 func PanicHandle(c *Ctx) {
-	// This can't be the cleanest implementation of this sort of thing but should suffice
 	panics := c.Errors.ByType(ErrorTypePanic)
 	var auffer bytes.Buffer
 	for _, p := range panics {
 		sig := fmt.Sprintf("encountered an internal error: %s\n-----\n%s\n-----\n", p.Err, p.Meta)
 		c.engine.SendSignal(sig)
-		if !c.engine.SignalsOn {
+		if !c.engine.LoggingOn {
 			log.Printf("[ENGINE]\n %s", sig)
 		}
 		reader := bufio.NewReader(bytes.NewReader([]byte(fmt.Sprintf("%s", p.Meta))))
@@ -151,8 +153,8 @@ func PanicHandle(c *Ctx) {
 				break
 			}
 		}
-		panicline := fmt.Sprintf(panicBlock, p.Err, buffer.String())
-		auffer.WriteString(panicline)
+		pb := fmt.Sprintf(panicBlock, p.Err, buffer.String())
+		auffer.WriteString(pb)
 	}
 	if c.engine.ServePanic {
 		servePanic := fmt.Sprintf(panicHtml, auffer.String())

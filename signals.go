@@ -6,7 +6,6 @@ type (
 
 func (e *Engine) NewSignaller() signal {
 	s := make(signal, 1)
-	//defer close(s)
 	return s
 }
 
@@ -14,8 +13,8 @@ func (e *Engine) SendSignal(msg string) {
 	e.signals <- msg
 }
 
-func (e *Engine) ReadSignal() {
+func (e *Engine) LogSignal() {
 	for msg := range e.signals {
-		e.logger.Printf(" %-25s", msg)
+		e.logger.Printf(" %s", msg)
 	}
 }

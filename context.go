@@ -36,6 +36,9 @@ func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request) *Ctx 
 }
 
 func (engine *Engine) putContext(c *Ctx) {
+	//if engine.SignalsOn {
+	//	engine.SendSignal(fmt.Sprintf("%d %s %s", c.RW.Status(), c.Request.Method, c.Request.URL.Path))
+	//}
 	c.group = nil
 	c.Request = nil
 	c.Params = nil
