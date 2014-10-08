@@ -126,8 +126,9 @@ func defaultHttpStatuses() HttpStatuses {
 }
 
 // PanicHandler is called with Http status 500 that gets all ErrorTypePanic from
-// *Ctx.Errors, sends them as a signal if engine has SignalsOn set true, or logs
-// to stdout if not, and and serves a basic html page if engine ServePanic is true.
+// *Ctx.Errors, logs to logger if LoggingOn is true(general logging otherwise,
+// you need to be informed of panics), and and serves a basic html page if engine
+// ServePanic is true.
 func PanicHandle(c *Ctx) {
 	panics := c.Errors.ByType(ErrorTypePanic)
 	var auffer bytes.Buffer
