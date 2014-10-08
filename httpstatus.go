@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"log"
@@ -22,21 +23,23 @@ const (
 html, body {
 font-family: "Roboto", sans-serif;
 color: #333333;
-background-color: #ea5343;
 margin: 0px;
 }
 h1 {
-color: #d04526;
+color: #2b3848;
 background-color: #ffffff;
 padding: 20px;
 border-bottom: 1px dashed #2b3848;
 }
 pre {
+font-size: 1.1em;
 margin: 20px;
 padding: 20px;
 border: 2px solid #2b3848;
 background-color: #ffffff;
 }
+pre p:nth-child(odd){margin:0;}
+pre p:nth-child(even){background-color: rgba(216,216,216,0.25); margin: 0;}
 </style>
 </head>
 <body>
@@ -123,15 +126,36 @@ func defaultHttpStatuses() HttpStatuses {
 }
 
 func PanicHandle(c *Ctx) {
+	// This can't be the cleanest implementation of this sort of thing but should suffice
 	panics := c.Errors.ByType(ErrorTypePanic)
-	var buffer bytes.Buffer
+	var auffer bytes.Buffer
 	for _, p := range panics {
-		log.Printf(fmt.Sprintf("\n-----\n[ENGINE] encountered an internal error: %s\n-----\n%s\n-----\n", p.Err, p.Meta))
-		b := fmt.Sprintf(panicBlock, p.Err, p.Meta)
-		buffer.WriteString(b)
+		sig := fmt.Sprintf("encountered an internal error: %s\n-----\n%s\n-----\n", p.Err, p.Meta)
+		c.engine.SendSignal(sig)
+		if !c.engine.SignalsOn {
+			log.Printf("[ENGINE]\n %s", sig)
+		}
+		reader := bufio.NewReader(bytes.NewReader([]byte(fmt.Sprintf("%s", p.Meta))))
+		var err error
+		lineno := 0
+		var buffer bytes.Buffer
+		for err == nil {
+			lineno++
+			l, _, err := reader.ReadLine()
+			if lineno%2 == 0 {
+				buffer.WriteString(fmt.Sprintf("\n%s</p>\n", l))
+			} else {
+				buffer.WriteString(fmt.Sprintf("<p>%s\n", l))
+			}
+			if err != nil {
+				break
+			}
+		}
+		panicline := fmt.Sprintf(panicBlock, p.Err, buffer.String())
+		auffer.WriteString(panicline)
 	}
 	if c.engine.ServePanic {
-		servePanic := fmt.Sprintf(panicHtml, buffer.String())
+		servePanic := fmt.Sprintf(panicHtml, auffer.String())
 		c.RW.Header().Set("Content-Type", "text/html")
 		c.RW.Write([]byte(servePanic))
 	}
