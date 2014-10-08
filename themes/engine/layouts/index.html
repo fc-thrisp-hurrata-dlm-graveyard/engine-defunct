@@ -1,0 +1,14 @@
+{{ template "theme/partials/head.html" . }}
+<html>
+    <body>
+        <div class="container">
+            <div id=e-content>
+                {{ template "theme/partials/logo.html" . }}
+                {{ range where .Data.Pages "Title" "engine-index"}}
+                    {{ .Content}}<br>
+                {{ end }}
+                {{ template "theme/partials/footer.html" }}
+            </div>
+        </div>
+    </body>
+</html>
