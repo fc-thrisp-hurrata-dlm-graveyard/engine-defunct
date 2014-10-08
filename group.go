@@ -1,11 +1,6 @@
 package engine
 
-import (
-	"net/http"
-	"path/filepath"
-
-	"github.com/thrisp/engine/router"
-)
+import "path/filepath"
 
 type (
 	Group struct {
@@ -43,13 +38,11 @@ func (group *Group) New(component string) *Group {
 	return newgroup
 }
 
-// Handle provides a route, method, and HandlerFunc to the router, and creates
+// Handle provides a route, method, and Manage to the router, and creates
 // a function using the handler when the router matches the route and method.
-func (group *Group) Handle(route string, method string, handler HandlerFunc) {
-	group.engine.router.Handle(method, group.pathFor(route), func(w http.ResponseWriter, req *http.Request, params router.Params) {
-		c := group.engine.getContext(w, req, params)
+func (group *Group) Handle(route string, method string, handler Manage) {
+	group.engine.Manage(method, group.pathFor(route), func(c *Ctx) {
 		c.group = group
 		handler(c)
-		group.engine.putContext(c)
 	})
 }

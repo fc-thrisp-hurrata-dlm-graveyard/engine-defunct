@@ -4,22 +4,16 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-
-	"github.com/thrisp/engine/router"
 )
 
 type (
-	// Any function taking a *Ctx, useful for chaining and maintaining existing
-	// Ctx data between functions
-	HandlerFunc func(*Ctx)
-
 	Ctx struct {
 		engine  *Engine
 		group   *Group
 		rwmem   responseWriter
 		RW      ResponseWriter
 		Request *http.Request
-		Params  router.Params
+		Params  Params
 		Form    url.Values
 		// Files
 		Errors errorMsgs
@@ -32,11 +26,10 @@ func (engine *Engine) newContext() interface{} {
 	return c
 }
 
-func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request, params router.Params) *Ctx {
+func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request) *Ctx {
 	c := engine.cache.Get().(*Ctx)
 	c.rwmem.reset(w)
 	c.Request = req
-	c.Params = params
 	req.ParseMultipartForm(engine.MaxFormMemory)
 	c.Form = req.Form
 	return c

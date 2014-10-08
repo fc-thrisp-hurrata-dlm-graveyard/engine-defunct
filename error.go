@@ -10,6 +10,7 @@ import (
 const (
 	ErrorTypeInternal = 1 << iota
 	ErrorTypeExternal = 1 << iota
+	ErrorTypePanic    = 1 << iota
 	ErrorTypeAll      = 0xffffffff
 )
 
@@ -23,13 +24,26 @@ var (
 type (
 	// Used with Ctx to collect errors that occurred during a http request.
 	errorMsg struct {
-		Err  string      `json:"error"`
 		Type uint32      `json:"-"`
+		Err  string      `json:"error"`
 		Meta interface{} `json:"meta"`
 	}
 
 	errorMsgs []errorMsg
+
+	EngineError struct {
+		format     string
+		parameters []interface{}
+	}
 )
+
+func newError(format string, parameters ...interface{}) error {
+	return &EngineError{format, parameters}
+}
+
+func (e *EngineError) Error() string {
+	return fmt.Sprintf(e.format, e.parameters...)
+}
 
 func (a errorMsgs) ByType(typ uint32) errorMsgs {
 	if len(a) == 0 {
@@ -49,8 +63,9 @@ func (a errorMsgs) String() string {
 		return ""
 	}
 	var buffer bytes.Buffer
+	buffer.WriteString("[Engine] Errors\n")
 	for i, msg := range a {
-		text := fmt.Sprintf("Engine Error #%02d: %s \n     Meta: %v\n", (i + 1), msg.Err, msg.Meta)
+		text := fmt.Sprintf("#%02d: %s\n%s\n", (i + 1), msg.Err, msg.Meta)
 		buffer.WriteString(text)
 	}
 	return buffer.String()
