@@ -1,0 +1,55 @@
+/*
+ http://www.colourlovers.com/palette/1429768/atomic_desert.
+ B3FF00 179,255,0
+ A8DF23 168,223,35
+ C2C474 194,196,116
+ AAAB6D 170,171,109
+ 969677 150,150,119
+*/
+
+.container { width: 620px; margin: 0 auto; margin-top: 2em; color: #333; font-family: "PT Sans", sans-serif; }
+
+a img {
+    border: none;
+}
+
+a {color: #A8DF23; text-decoration: none;}
+a:hover {color: #B3FF00; border-bottom: 1px dotted #B3FF00;}
+a.reference em {font-style: normal;}
+
+strong { color: #000; }
+
+h1 { margin-bottom: 12px; }
+
+h2 { margin-bottom: 6px; }
+
+pre {
+    font-family: consolas,monospace;
+    font-size: 85%;
+    line-height: 1.5em;
+    padding: .5em 1em; 
+    border-radius: 5px;
+    background-color: rgba(150,150,119, 0.2);
+    text-shadow: 0 1px 0 white;
+    overflow-x: auto;
+}
+
+code {
+    font-family: consolas,monospace;
+    font-size: 85%;
+    color: #000;           
+    font-weight: bold;
+}
+
+td.code { width: 100%; }
+
+#fl-logo{margin-left: auto; margin-right: auto; width: 100%;}
+#fl-title{font-size:5em; font-weight: 900; float: left; width: 67%;}
+#fl-img{width: 32%; float: right;}
+#fl-img img{width: 200px;}
+#fl-tagline{}
+
+#fl-content{}
+#fl-content > table{margin-left: auto; margin-right: auto; width: 100%;}
+
+.fl-sidebar{}
