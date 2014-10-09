@@ -2,7 +2,10 @@
 title = "engine-index"
 +++
 
-tagline, title
+Engine is a core package to drive a Go web framework with routing, context, statuses
+and more to bridge the distance between the Go standard library and your own web
+framework.
+
 
 ### Install
 
@@ -43,3 +46,5 @@ main.go
         go e.Run(":8080")
         <-quit
     }
+
+go run main.go

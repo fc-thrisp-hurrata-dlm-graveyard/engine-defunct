@@ -17,7 +17,9 @@
       <guid>http://localhost:1313/engine/</guid>
       <description>
 
-&lt;p&gt;tagline, title&lt;/p&gt;
+&lt;p&gt;Engine is a core package to drive a Go web framework with routing, context, statuses
+and more to bridge the distance between the Go standard library and your own web
+framework.&lt;/p&gt;
 
 &lt;h3 id=&#34;toc_0&#34;&gt;Install&lt;/h3&gt;
 
