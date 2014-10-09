@@ -1,11 +1,14 @@
 package engine
 
+import "log"
+
 type (
 	signal chan string
 )
 
 func (e *Engine) NewSignaller() signal {
 	s := make(signal, 1)
+	//defer close(s)
 	return s
 }
 
@@ -15,6 +18,10 @@ func (e *Engine) SendSignal(msg string) {
 
 func (e *Engine) LogSignal() {
 	for msg := range e.signals {
-		e.logger.Printf(" %s", msg)
+		if e.logger != nil {
+			e.logger.Printf(" %s", msg)
+		} else {
+			log.Printf("[ENGINE] %s", msg)
+		}
 	}
 }

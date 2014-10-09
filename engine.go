@@ -40,7 +40,7 @@ func defaultconf() *conf {
 		RedirectTrailingSlash: true,
 		RedirectFixedPath:     true,
 		HTMLStatus:            false,
-		LoggingOn:             true,
+		LoggingOn:             false,
 		MaxFormMemory:         1000000,
 	}
 }
@@ -58,6 +58,13 @@ func New() *Engine {
 	engine.Group = NewGroup("/", engine)
 	engine.cache.New = engine.newContext
 	engine.signals = engine.NewSignaller()
+	return engine
+}
+
+// Basic produces a new engine with LoggingOn set to true
+func Basic() *Engine {
+	engine := New()
+	engine.LoggingOn = true
 	engine.logger = log.New(os.Stdout, "[Engine]", 0)
 	go engine.LogSignal()
 	return engine
@@ -131,6 +138,7 @@ func (e *Engine) ServeFiles(path string, root http.FileSystem) {
 	})
 }
 
+// internal "recover"
 func (e *Engine) rcvr(c *Ctx) {
 	if rcv := recover(); rcv != nil {
 		p := newError(fmt.Sprintf("%s", rcv))
@@ -140,21 +148,20 @@ func (e *Engine) rcvr(c *Ctx) {
 	}
 }
 
+// internal "not found"
 func (e *Engine) ntfnd(c *Ctx) {
 	c.group = e.Group
 	c.Status(404)
 }
 
-// ServeHTTP makes the engine implement the http.Handler interface.
-func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	c := engine.getContext(w, req)
+// internal "serve http"
+func (engine *Engine) srvhttp(w http.ResponseWriter, req *http.Request, c *Ctx) {
 	defer engine.rcvr(c)
 	if root := engine.trees[req.Method]; root != nil {
 		path := req.URL.Path
 		if manage, ps, tsr := root.getValue(path); manage != nil {
 			c.Params = ps
 			manage(c)
-			engine.putContext(c)
 			return
 		} else if req.Method != "CONNECT" && path != "/" {
 			code := 301 // Permanent redirect, request with GET method
@@ -171,7 +178,6 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 					req.URL.Path = path + "/"
 				}
 				http.Redirect(w, req, req.URL.String(), code)
-				engine.putContext(c)
 				return
 			}
 
@@ -184,7 +190,6 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				if found {
 					req.URL.Path = string(fixedPath)
 					http.Redirect(w, req, req.URL.String(), code)
-					engine.putContext(c)
 					return
 				}
 			}
@@ -192,6 +197,58 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	engine.ntfnd(c)
+	return
+}
+
+// ServeHTTP makes the engine implement the http.Handler interface.
+func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	c := engine.getContext(w, req)
+	/*
+		defer engine.rcvr(c)
+		if root := engine.trees[req.Method]; root != nil {
+			path := req.URL.Path
+			if manage, ps, tsr := root.getValue(path); manage != nil {
+				c.Params = ps
+				manage(c)
+				engine.putContext(c)
+				return
+			} else if req.Method != "CONNECT" && path != "/" {
+				code := 301 // Permanent redirect, request with GET method
+				if req.Method != "GET" {
+					// Temporary redirect, request with same method
+					// As of Go 1.3, Go does not support status code 308.
+					code = 307
+				}
+
+				if tsr && engine.RedirectTrailingSlash {
+					if path[len(path)-1] == '/' {
+						req.URL.Path = path[:len(path)-1]
+					} else {
+						req.URL.Path = path + "/"
+					}
+					http.Redirect(w, req, req.URL.String(), code)
+					engine.putContext(c)
+					return
+				}
+
+				// Try to fix the request path
+				if engine.RedirectFixedPath {
+					fixedPath, found := root.findCaseInsensitivePath(
+						CleanPath(path),
+						engine.RedirectTrailingSlash,
+					)
+					if found {
+						req.URL.Path = string(fixedPath)
+						http.Redirect(w, req, req.URL.String(), code)
+						engine.putContext(c)
+						return
+					}
+				}
+			}
+		}
+		engine.ntfnd(c)
+	*/
+	engine.srvhttp(w, req, c)
 	engine.putContext(c)
 }
 
