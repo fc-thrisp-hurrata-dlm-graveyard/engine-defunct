@@ -1,17 +1,13 @@
-{{ template "theme/partials/head.html" . }}
+{{ partial "head.html" . }}
 <html>
     <body>
-        <div class="container">
-        {{ template "theme/partials/sidebar.html" }}
-        <div id=e-right>
-            {{ template "theme/partials/logo.html" . }}
-            <div id=e-content>
-                {{ range where .Data.Pages "Title" "engine-index"}}
-                    {{ .Content}}<br>
-                {{ end }}    
+        {{ partial "sidebar.html" . }}
+        <div class="content container">
+            <div class=page>
+            {{ range where .Data.Pages "Title" "engine-index"}}
+                {{ .Content}}
+                {{ end }} 
             </div>
-        </div>
-        {{ template "theme/partials/footer.html" }}
         </div>
     </body>
 </html>
