@@ -1,19 +1,12 @@
 /*
- http://www.colourlovers.com/palette/2599892/Soft_X_Neon
- FA94AC 250,148,172
- BB8FCC 187,143,204
- FF183B 255,24,59
- 00DAB4 0,218,180
- FAF446 250,244,70
-
  modified version of hyde: https://github.com/poole/hyde.
 */
 
 body{background-color: rgba(245,245,245,0.2);}
 
-a {color: #001E19; text-decoration: none;}
-a:hover {color: #00DAB4; border-bottom: 1px dotted #00DAB4;}
-a:visited {color: #FF183B;}
+a {color: #190D27; text-decoration: none;}
+a:hover {color: #4AD700; border-bottom: 1px dotted #4AD700;}
+a:visited {color: #4AD700;}
 a.reference em {font-style: normal;}
 
 pre {
@@ -22,7 +15,7 @@ pre {
     line-height: 1.5em;
     padding: .5em 1em; 
     border-radius: 5px;
-    background-color:  rgba(245,245,245,0.8);
+    background-color: rgba(245,245,245,0.8);
     text-shadow: 0 1px 0 white;
     overflow-x: auto;
 }
@@ -30,7 +23,7 @@ pre {
 code {
     font-family: consolas,monospace;
     font-size: 85%;
-    color: #000;           
+    color: #333;           
     font-weight: bold;
 }
 
@@ -88,11 +81,11 @@ html {
 
 /* About section */
 .sidebar-about h1 {
-  color: rgba(0,218,180,1);
+  color: #190D27;
   margin-top: 0;
   font-family: "PT Sans", sans-serif;
-  font-weight: 900;
-  font-size: 4.25rem;
+  font-weight: 700;
+  font-size: 3.5rem;
 }
 
 /* Sidebar nav */

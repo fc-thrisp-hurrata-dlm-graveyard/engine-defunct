@@ -18,7 +18,7 @@
       <description>
 
 &lt;p&gt;Engine is a core package to drive a Go web framework. Routing, context, statuses
-and more to bridge the distance between the Go standard library and your own web
+and more close the distance between the Go standard library and your own web
 framework.&lt;/p&gt;
 
 &lt;h3 id=&#34;toc_0&#34;&gt;Install&lt;/h3&gt;
