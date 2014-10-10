@@ -2,23 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://thrisp.github.io/engine/</loc>
+    <loc>http://localhost:1313/engine/</loc>
     <lastmod>0001-01-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://thrisp.github.io/engine/quick/</loc>
+    <loc>http://localhost:1313/engine/quick/</loc>
     <lastmod>0001-01-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://thrisp.github.io/engine/</loc>
+    <loc>http://localhost:1313/engine/</loc>
     <lastmod>0001-01-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://thrisp.github.io/engine/documentation/</loc>
+    <loc>http://localhost:1313/engine/documentation/</loc>
     <lastmod>0001-01-01T00:00:00+00:00</lastmod>
   </url>
   

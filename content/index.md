@@ -1,9 +1,9 @@
 +++
 title = "engine-index"
 +++
-Engine is a core package to drive a Go web framework. Routing, context, statuses
-and more close the distance between the Go standard library and your own web
-framework. 
+### What is Engine?
+
+Engine is a core package to drive a web applications in Go. Routing based on [httprouter](https://github.com/julienschmidt/httprouter), context, statuses and more close the distance between the Go standard library and your own web framework. 
 
 
 ### Install
@@ -15,7 +15,7 @@ framework.
 
 ### Documentaation
 
-- [Current](/engine/documentation)
+- [Current (0.0.2)](/engine/documentation)
 
 - [GoDoc](https://godoc.org/github.com/thrisp/engine)
 
