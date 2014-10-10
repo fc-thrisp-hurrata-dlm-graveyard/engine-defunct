@@ -8,7 +8,6 @@ type (
 
 func (e *Engine) NewSignaller() signal {
 	s := make(signal, 1)
-	//defer close(s)
 	return s
 }
 
