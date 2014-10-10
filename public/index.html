@@ -19,7 +19,7 @@
     <div class="container">
         <div class="sidebar-about">
             <h1>Engine</h1>
-            <img src="/engine/img/engine-logo-2.png"></img>
+            <img src="/engine/img/engine-logo-1.png"></img>
         </div>
         <div class="sidebar-sticky">
             <ul class="sidebar-nav">
@@ -46,44 +46,72 @@ framework.</p>
 <pre><code>go get github.com/thrisp/engine
 </code></pre>
 
-<h3 id="toc_1">Quickstart</h3>
+<p><a href="/engine/quick"><em>Quick Start</em></a></p>
 
-<p>main.go</p>
+<h3 id="toc_1">Documentaation</h3>
 
-<pre><code>package main
+<ul>
+<li><p><a href="/engine/documentation">Current</a></p></li>
 
-import (
-    &quot;os&quot;
-    &quot;os/signal&quot;
-    &quot;github.com/thrisp/engine&quot;
-)
+<li><p><a href="https://godoc.org/github.com/thrisp/engine">GoDoc</a></p></li>
+</ul>
 
-func Display(c *engine.Ctx) {
-    c.RW.Header().Set(&quot;Content-Type&quot;, &quot;text/html&quot;)
-    c.RW.Write(&quot;HELLO WORLD!&quot;)
-}
+<h3 id="toc_2">Configuration</h3>
 
-var quit = make(chan bool)
+<p>Several configuration options are currently available, by specifying:</p>
 
-func init() {
-    c := make(chan os.Signal, 1)
-    signal.Notify(c, os.Interrupt)
-    go func() {
-        for _ = range c {
-            quit &lt;- true
-        }
-    }()
-}
-
-func main() {
-    e := engine.Basic()
-    e.Manage(&quot;GET&quot;, &quot;/hello/world/&quot;, Display)
-    go e.Run(&quot;:8080&quot;)
-    &lt;-quit
-}
+<pre><code>engine.Option = value 
 </code></pre>
 
-<p>go run main.go</p>
+<p>where needed in your code.</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">Option</th>
+<th align="center">Explanation</th>
+<th align="center">Default</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center">ServePanic</td>
+<td align="center">Serves a html page on panic</td>
+<td align="center">true</td>
+</tr>
+
+<tr>
+<td align="center">RedirectTrailingSlash</td>
+<td align="center">Enables automatic redirection if the current route can&rsquo;t be matched but a handler for the path with (without) the trailing slash exists</td>
+<td align="center">true</td>
+</tr>
+
+<tr>
+<td align="center">RedirectFixedPath</td>
+<td align="center">If enabled, the router tries to fix the current request path, if no handle is registered for it</td>
+<td align="center">true</td>
+</tr>
+
+<tr>
+<td align="center">HTMLStatus</td>
+<td align="center">All statuses send a simple html page</td>
+<td align="center">false</td>
+</tr>
+
+<tr>
+<td align="center">LoggingOn</td>
+<td align="center">All signals are sent to stdout through the logger or a default logger</td>
+<td align="center">false</td>
+</tr>
+
+<tr>
+<td align="center">MaxFormMemory</td>
+<td align="center">maximum size for file uploads, in bytes</td>
+<td align="center">1000000</td>
+</tr>
+</tbody>
+</table>
 
                  
             </div>
