@@ -50,8 +50,8 @@ func Empty() *Engine {
 	return &Engine{}
 }
 
-// New produces a new engine, with default configuration, method for retrieving
-// a new Ctx, signals & logging.
+// New produces a new engine, with default configuration, a base group, method
+// for retrieving a new Ctx, and signalling.
 func New() *Engine {
 	engine := Empty()
 	engine.conf = defaultconf()
@@ -61,7 +61,7 @@ func New() *Engine {
 	return engine
 }
 
-// Basic produces a new engine with LoggingOn set to true
+// Basic produces a new engine with LoggingOn set to true and visible logging.
 func Basic() *Engine {
 	engine := New()
 	engine.LoggingOn = true
@@ -70,7 +70,7 @@ func Basic() *Engine {
 	return engine
 }
 
-// manage registers a new request Manage function with the given path and method.
+// Registers a new request Manage function with the given path and method.
 func (e *Engine) Manage(method string, path string, m Manage) {
 	if path[0] != '/' {
 		panic("path must begin with '/'")
@@ -115,13 +115,16 @@ func (e *Engine) Lookup(method, path string) (Manage, Params, bool) {
 	return nil, nil, false
 }
 
-// ServeFiles serves files from the given file system root.
-// The path must end with "/*filepath", files are then served from the local
-// path /defined/root/dir/*filepath.
-// For example if root is "/etc" and *filepath is "passwd", the local file
+// ServeFiles serves files from the given file system root. The path must end
+// with "/*filepath", files are then served from the local path
+// /defined/root/dir/*filepath.
+//
+// e.g., if root is "/etc" and *filepath is "passwd", the local file
 // "/etc/passwd" would be served.
+//
 // Internally a http.FileServer is used, therefore http.NotFound is used instead
 // of the Router's NotFound handler.
+//
 // To use the operating system's file system implementation,
 // use http.Dir:
 //     router.ServeFiles("/src/*filepath", http.Dir("/var/www"))
@@ -154,7 +157,7 @@ func (e *Engine) ntfnd(c *Ctx) {
 	c.Status(404)
 }
 
-// internal "serve http"
+// internal "servehttp"
 func (engine *Engine) srvhttp(w http.ResponseWriter, req *http.Request, c *Ctx) {
 	defer engine.rcvr(c)
 	if root := engine.trees[req.Method]; root != nil {
@@ -203,51 +206,6 @@ func (engine *Engine) srvhttp(w http.ResponseWriter, req *http.Request, c *Ctx) 
 // ServeHTTP makes the engine implement the http.Handler interface.
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	c := engine.getContext(w, req)
-	/*
-		defer engine.rcvr(c)
-		if root := engine.trees[req.Method]; root != nil {
-			path := req.URL.Path
-			if manage, ps, tsr := root.getValue(path); manage != nil {
-				c.Params = ps
-				manage(c)
-				engine.putContext(c)
-				return
-			} else if req.Method != "CONNECT" && path != "/" {
-				code := 301 // Permanent redirect, request with GET method
-				if req.Method != "GET" {
-					// Temporary redirect, request with same method
-					// As of Go 1.3, Go does not support status code 308.
-					code = 307
-				}
-
-				if tsr && engine.RedirectTrailingSlash {
-					if path[len(path)-1] == '/' {
-						req.URL.Path = path[:len(path)-1]
-					} else {
-						req.URL.Path = path + "/"
-					}
-					http.Redirect(w, req, req.URL.String(), code)
-					engine.putContext(c)
-					return
-				}
-
-				// Try to fix the request path
-				if engine.RedirectFixedPath {
-					fixedPath, found := root.findCaseInsensitivePath(
-						CleanPath(path),
-						engine.RedirectTrailingSlash,
-					)
-					if found {
-						req.URL.Path = string(fixedPath)
-						http.Redirect(w, req, req.URL.String(), code)
-						engine.putContext(c)
-						return
-					}
-				}
-			}
-		}
-		engine.ntfnd(c)
-	*/
 	engine.srvhttp(w, req, c)
 	engine.putContext(c)
 }

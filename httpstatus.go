@@ -50,30 +50,31 @@ pre p:nth-child(even){background-color: rgba(216,216,216,0.25); margin: 0;}
 )
 
 type (
-	// Status code, message, and handlers for a http status.
+	// Status code, message, and Manage handlers for a http status.
 	HttpStatus struct {
-		code     int
-		message  string
-		handlers []Manage
+		Code     int
+		Message  string
+		Handlers []Manage
 	}
 
 	// A map of HttpStatus instances, keyed by status code
 	HttpStatuses map[int]*HttpStatus
 )
 
+// Create new HttpStatus with the code, message, and default Manage handlers.
 func NewHttpStatus(code int, message string) *HttpStatus {
-	n := &HttpStatus{code: code, message: message}
-	n.handlers = append(n.handlers, n.before(), n.after())
+	n := &HttpStatus{Code: code, Message: message}
+	n.Handlers = append(n.Handlers, n.before(), n.after())
 	return n
 }
 
 func (h *HttpStatus) name() string {
-	return http.StatusText(h.code)
+	return http.StatusText(h.Code)
 }
 
 func (h *HttpStatus) before() Manage {
 	return func(c *Ctx) {
-		c.RW.WriteHeader(h.code)
+		c.RW.WriteHeader(h.Code)
 	}
 }
 
@@ -91,21 +92,21 @@ func (h *HttpStatus) after() Manage {
 }
 
 func (h *HttpStatus) format() []byte {
-	return []byte(fmt.Sprintf(statusHtml, h.code, h.name(), h.name(), h.message))
+	return []byte(fmt.Sprintf(statusHtml, h.Code, h.name(), h.name(), h.Message))
 }
 
 // Adds any number of custom Manage to the HttpStatus, between the
-// default status before & after handlers.
+// default status before & after manage.
 func (h *HttpStatus) Update(handlers ...Manage) {
-	s := len(h.handlers) + len(handlers)
+	s := len(h.Handlers) + len(handlers)
 	newh := make([]Manage, 0, s)
-	newh = append(newh, h.handlers[0])
-	if len(h.handlers) > 2 {
-		newh = append(newh, h.handlers[1:(len(h.handlers)-2)]...)
+	newh = append(newh, h.Handlers[0])
+	if len(h.Handlers) > 2 {
+		newh = append(newh, h.Handlers[1:(len(h.Handlers)-2)]...)
 	}
 	newh = append(newh, handlers...)
-	newh = append(newh, h.handlers[len(h.handlers)-1])
-	h.handlers = newh
+	newh = append(newh, h.Handlers[len(h.Handlers)-1])
+	h.Handlers = newh
 }
 
 func defaultHttpStatuses() HttpStatuses {
@@ -125,16 +126,15 @@ func defaultHttpStatuses() HttpStatuses {
 	return hss
 }
 
-// PanicHandler is called with Http status 500 that gets all ErrorTypePanic from
-// *Ctx.Errors, logs to logger if LoggingOn is true(general logging otherwise,
-// you need to be informed of panics), and and serves a basic html page if engine
-// ServePanic is true.
+// PanicHandle is the default Manage for 500 & internal panics. Retrieves all
+// ErrorTypePanic from *Ctx.Errors, sends signal, logs to stdout or logger, and
+// serves a basic html page if engine.ServePanic is true.
 func PanicHandle(c *Ctx) {
 	panics := c.Errors.ByType(ErrorTypePanic)
 	var auffer bytes.Buffer
 	for _, p := range panics {
 		sig := fmt.Sprintf("encountered an internal error: %s\n-----\n%s\n-----\n", p.Err, p.Meta)
-		go c.engine.SendSignal(sig) // this will hang in another package (e.g. Flotilla) without making it go
+		go c.engine.SendSignal(sig)
 		if !c.engine.LoggingOn {
 			log.Printf("[ENGINE]\n %s", sig)
 		}
@@ -164,7 +164,7 @@ func PanicHandle(c *Ctx) {
 	}
 }
 
-// New creates a HttpStatus in the HttpStatuss map.
+// New adds a new HttpStatus to HttpStatuses keyed by status code.
 func (hs HttpStatuses) New(h *HttpStatus) {
-	hs[h.code] = h
+	hs[h.Code] = h
 }

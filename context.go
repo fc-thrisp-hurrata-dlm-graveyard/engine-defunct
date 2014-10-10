@@ -8,6 +8,8 @@ import (
 )
 
 type (
+	// Ctx is the core request-response context passed between any Manage
+	// handlers, useful for storing & persisting data within a request & response.
 	Ctx struct {
 		engine  *Engine
 		group   *Group
@@ -16,7 +18,7 @@ type (
 		Request *http.Request
 		Params  Params
 		Form    url.Values
-		// Files
+		// Files tbd
 		Errors errorMsgs
 	}
 )
@@ -53,10 +55,8 @@ func (c *Ctx) errorTyped(err error, typ uint32, meta interface{}) {
 	})
 }
 
-// Attaches an error that is pushed to a list of errors. It's a good idea
-// to call Error for each error that occurred during the resolution of a request.
-// A middleware can be used to collect all the errors and push them to a database
-// together, print a log, or append it in the HTTP response.
+// Attaches an error to a list of errors. Call Error for each error that occurred
+// during the resolution of a request.
 func (c *Ctx) Error(err error, meta interface{}) {
 	c.errorTyped(err, ErrorTypeExternal, meta)
 }
@@ -71,7 +71,7 @@ func (c *Ctx) LastError() error {
 	}
 }
 
-// Immediately abort the context writing out the code to the response
+// Immediately abort the context, writing out the code to the response
 func (c *Ctx) Abort(code int) {
 	if code >= 0 {
 		c.RW.WriteHeader(code)
@@ -89,13 +89,13 @@ func (c *Ctx) Fail(code int, err error) {
 	c.Abort(code)
 }
 
-// Calls an HttpException in the current group by integer code from the Context,
+// Calls an HttpStatus in the current group by integer code from the Context,
 // if the status exists.
 func (c *Ctx) Status(code int) {
 	if status, ok := c.group.HttpStatuses[code]; ok {
-		s := len(status.handlers)
+		s := len(status.Handlers)
 		for i := 0; i < s; i++ {
-			status.handlers[i](c)
+			status.Handlers[i](c)
 		}
 	}
 }
