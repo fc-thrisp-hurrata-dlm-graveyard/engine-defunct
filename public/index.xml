@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Recent Content on  </title>
+      <generator uri="https://hugo.spf13.com">Hugo</generator>
+    <link>http://localhost:1313/engine/index.xml/</link>
+    
+    
+    
+    <updated>Mon, 01 Jan 0001 00:00:00 UTC</updated>
+    
+    <item>
+      <title>engine-index</title>
+      <link>http://localhost:1313/engine/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
+      
+      <guid>http://localhost:1313/engine/</guid>
+      <description>
+
+&lt;p&gt;Engine is a core package to drive a Go web framework. Routing, context, statuses
+and more close the distance between the Go standard library and your own web
+framework.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_0&#34;&gt;Install&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;go get github.com/thrisp/engine
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_1&#34;&gt;Quickstart&lt;/h3&gt;
+
+&lt;p&gt;main.go&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;package main
+
+import (
+    &amp;quot;os&amp;quot;
+    &amp;quot;os/signal&amp;quot;
+    &amp;quot;github.com/thrisp/engine&amp;quot;
+)
+
+func Display(c *engine.Ctx) {
+    c.RW.Header().Set(&amp;quot;Content-Type&amp;quot;, &amp;quot;text/html&amp;quot;)
+    c.RW.Write(&amp;quot;HELLO WORLD!&amp;quot;)
+}
+
+var quit = make(chan bool)
+
+func init() {
+    c := make(chan os.Signal, 1)
+    signal.Notify(c, os.Interrupt)
+    go func() {
+        for _ = range c {
+            quit &amp;lt;- true
+        }
+    }()
+}
+
+func main() {
+    e := engine.Basic()
+    e.Manage(&amp;quot;GET&amp;quot;, &amp;quot;/hello/world/&amp;quot;, Display)
+    go e.Run(&amp;quot;:8080&amp;quot;)
+    &amp;lt;-quit
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;go run main.go&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
