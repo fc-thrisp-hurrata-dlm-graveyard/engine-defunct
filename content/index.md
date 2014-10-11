@@ -15,7 +15,7 @@ Engine is a core package to drive a web applications in Go. Routing based on [ht
 
 ### Documentaation
 
-- [Current (0.0.2)](/engine/documentation)
+- [Current (0.0.2)](/engine/documentation/0.0.2/)
 
 - [GoDoc](https://godoc.org/github.com/thrisp/engine)
 

@@ -1,5 +1,5 @@
 +++
-title = "Documentation"
+title = "Documentation 0.0.2"
 +++
 # engine
     import "github.com/thrisp/engine"
@@ -14,10 +14,6 @@ const (
     ErrorTypeExternal = 1 << iota
     ErrorTypePanic    = 1 << iota
     ErrorTypeAll      = 0xffffffff
-)
-```
-``` go
-const (
     NotWritten = -1
 )
 ```
@@ -242,7 +238,7 @@ To use the operating system's file system implementation,
 use http.Dir:
 
 
-	router.ServeFiles("/src/\*filepath", http.Dir("/var/www"))
+	router.ServeFiles("/src/*filepath", http.Dir("/var/www"))
 
 
 
