@@ -3,74 +3,18 @@
   <channel>
       <title>Recent Content on  </title>
       <generator uri="https://hugo.spf13.com">Hugo</generator>
-    <link>http://localhost:1313/engine/index.xml/</link>
+    <link>http://thrisp.github.io/engine/index.xml/</link>
     
     
     
     <updated>Mon, 01 Jan 0001 00:00:00 UTC</updated>
     
     <item>
-      <title>Install &amp; Quick Start</title>
-      <link>http://localhost:1313/engine/quick/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
-      
-      <guid>http://localhost:1313/engine/quick/</guid>
-      <description>
-
-&lt;h1 id=&#34;toc_0&#34;&gt;Install &amp;amp; QuickStart&lt;/h1&gt;
-
-&lt;h3 id=&#34;toc_1&#34;&gt;Install&lt;/h3&gt;
-
-&lt;pre&gt;&lt;code&gt;go get github.com/thrisp/engine
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;toc_2&#34;&gt;Quickstart&lt;/h3&gt;
-
-&lt;p&gt;main.go&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;package main
-
-import (
-    &amp;quot;os&amp;quot;
-    &amp;quot;os/signal&amp;quot;
-    &amp;quot;github.com/thrisp/engine&amp;quot;
-)
-
-func Display(c *engine.Ctx) {
-    c.RW.Header().Set(&amp;quot;Content-Type&amp;quot;, &amp;quot;text/html&amp;quot;)
-    c.RW.Write(&amp;quot;HELLO WORLD!&amp;quot;)
-}
-
-var quit = make(chan bool)
-
-func init() {
-    c := make(chan os.Signal, 1)
-    signal.Notify(c, os.Interrupt)
-    go func() {
-        for _ = range c {
-            quit &amp;lt;- true
-        }
-    }()
-}
-
-func main() {
-    e := engine.Basic()
-    e.Manage(&amp;quot;GET&amp;quot;, &amp;quot;/hello/world/&amp;quot;, Display)
-    go e.Run(&amp;quot;:8080&amp;quot;)
-    &amp;lt;-quit
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;go run main.go&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>engine-index</title>
-      <link>http://localhost:1313/engine/</link>
+      <link>http://thrisp.github.io/engine/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
       
-      <guid>http://localhost:1313/engine/</guid>
+      <guid>http://thrisp.github.io/engine/</guid>
       <description>
 
 &lt;h3 id=&#34;toc_0&#34;&gt;What is Engine?&lt;/h3&gt;
@@ -87,7 +31,7 @@ func main() {
 &lt;h3 id=&#34;toc_2&#34;&gt;Documentaation&lt;/h3&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;p&gt;&lt;a href=&#34;/engine/documentation&#34;&gt;Current (0.0.2)&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;/engine/documentation/0.0.2/&#34;&gt;Current (0.0.2)&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
 
 &lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://godoc.org/github.com/thrisp/engine&#34;&gt;GoDoc&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
@@ -152,11 +96,67 @@ func main() {
     </item>
     
     <item>
-      <title>Documentation</title>
-      <link>http://localhost:1313/engine/documentation/0.0.2/</link>
+      <title>Install &amp; Quick Start</title>
+      <link>http://thrisp.github.io/engine/quick/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
       
-      <guid>http://localhost:1313/engine/documentation/0.0.2/</guid>
+      <guid>http://thrisp.github.io/engine/quick/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Install &amp;amp; QuickStart&lt;/h1&gt;
+
+&lt;h3 id=&#34;toc_1&#34;&gt;Install&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;go get github.com/thrisp/engine
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_2&#34;&gt;Quickstart&lt;/h3&gt;
+
+&lt;p&gt;main.go&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;package main
+
+import (
+    &amp;quot;os&amp;quot;
+    &amp;quot;os/signal&amp;quot;
+    &amp;quot;github.com/thrisp/engine&amp;quot;
+)
+
+func Display(c *engine.Ctx) {
+    c.RW.Header().Set(&amp;quot;Content-Type&amp;quot;, &amp;quot;text/html&amp;quot;)
+    c.RW.Write(&amp;quot;HELLO WORLD!&amp;quot;)
+}
+
+var quit = make(chan bool)
+
+func init() {
+    c := make(chan os.Signal, 1)
+    signal.Notify(c, os.Interrupt)
+    go func() {
+        for _ = range c {
+            quit &amp;lt;- true
+        }
+    }()
+}
+
+func main() {
+    e := engine.Basic()
+    e.Manage(&amp;quot;GET&amp;quot;, &amp;quot;/hello/world/&amp;quot;, Display)
+    go e.Run(&amp;quot;:8080&amp;quot;)
+    &amp;lt;-quit
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;go run main.go&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Documentation 0.0.2</title>
+      <link>http://thrisp.github.io/engine/documentation/0.0.2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
+      
+      <guid>http://thrisp.github.io/engine/documentation/0.0.2/</guid>
       <description>
 
 &lt;h1 id=&#34;toc_0&#34;&gt;engine&lt;/h1&gt;
@@ -171,10 +171,6 @@ func main() {
     ErrorTypeExternal = 1 &amp;lt;&amp;lt; iota
     ErrorTypePanic    = 1 &amp;lt;&amp;lt; iota
     ErrorTypeAll      = 0xffffffff
-)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;const (
     NotWritten = -1
 )
 &lt;/code&gt;&lt;/pre&gt;
@@ -366,7 +362,7 @@ of the Router&amp;rsquo;s NotFound handler.&lt;/p&gt;
 &lt;p&gt;To use the operating system&amp;rsquo;s file system implementation,
 use http.Dir:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;router.ServeFiles(&amp;quot;/src/\*filepath&amp;quot;, http.Dir(&amp;quot;/var/www&amp;quot;))
+&lt;pre&gt;&lt;code&gt;router.ServeFiles(&amp;quot;/src/*filepath&amp;quot;, http.Dir(&amp;quot;/var/www&amp;quot;))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h3 id=&#34;toc_23&#34;&gt;func (*Engine) ServeHTTP&lt;/h3&gt;

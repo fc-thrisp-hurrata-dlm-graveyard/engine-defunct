@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title> Documentation </title>
+    <title> Documentation 0.0.2 </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <link rel="stylesheet" href="/engine/css/poole.css">
@@ -48,10 +48,6 @@
     ErrorTypeExternal = 1 &lt;&lt; iota
     ErrorTypePanic    = 1 &lt;&lt; iota
     ErrorTypeAll      = 0xffffffff
-)
-</code></pre>
-
-<pre><code class="language-go">const (
     NotWritten = -1
 )
 </code></pre>
@@ -243,7 +239,7 @@ of the Router&rsquo;s NotFound handler.</p>
 <p>To use the operating system&rsquo;s file system implementation,
 use http.Dir:</p>
 
-<pre><code>router.ServeFiles(&quot;/src/\*filepath&quot;, http.Dir(&quot;/var/www&quot;))
+<pre><code>router.ServeFiles(&quot;/src/*filepath&quot;, http.Dir(&quot;/var/www&quot;))
 </code></pre>
 
 <h3 id="toc_23">func (*Engine) ServeHTTP</h3>
