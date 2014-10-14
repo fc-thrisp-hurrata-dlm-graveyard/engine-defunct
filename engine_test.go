@@ -27,7 +27,7 @@ func methodNotMethod(method string) string {
 
 func testRouteOK(method string, t *testing.T) {
 	passed := false
-	e := Basic()
+	e, _ := Basic()
 
 	e.Handle("/test", method, func(c *Ctx) { passed = true })
 
@@ -52,7 +52,7 @@ func TestRouteOK(t *testing.T) {
 
 func testGroupOK(method string, t *testing.T) {
 	passed := false
-	e := Basic()
+	e, _ := Basic()
 
 	e.Handle("/test_group", method, func(c *Ctx) { passed = true })
 
@@ -77,7 +77,7 @@ func TestGroupOK(t *testing.T) {
 
 func testSubGroupOK(method string, t *testing.T) {
 	passed := false
-	e := Basic()
+	e, _ := Basic()
 	g := e.New("/test_group")
 	g.Handle("/test_group_subgroup", method, func(c *Ctx) { passed = true })
 
@@ -102,7 +102,7 @@ func TestSubGroupOK(t *testing.T) {
 
 func testRouteNotOK(method string, t *testing.T) {
 	passed := false
-	e := Basic()
+	e, _ := Basic()
 	othermethod := methodNotMethod(method)
 	e.Handle("/test_2", othermethod, func(c *Ctx) { passed = true })
 	w := PerformRequest(e, method, "/test")
@@ -141,7 +141,7 @@ func (m *mockResponseWriter) WriteString(s string) (n int, err error) {
 func (m *mockResponseWriter) WriteHeader(int) {}
 
 func TestRouter(t *testing.T) {
-	engine := Basic()
+	engine, _ := Basic()
 
 	routed := false
 
@@ -176,7 +176,7 @@ func TestRouterAPI(t *testing.T) {
 
 	httpHandler := handlerStruct{&handler}
 
-	router := Basic()
+	router, _ := Basic()
 	router.Manage("GET", "/GET", func(c *Ctx) {
 		get = true
 	})
@@ -243,7 +243,7 @@ func TestRouterAPI(t *testing.T) {
 }
 
 func TestRouterRoot(t *testing.T) {
-	router := Basic()
+	router, _ := Basic()
 	recv := catchPanic(func() {
 		router.Manage("GET", "noSlashRoot", nil)
 	})
@@ -259,7 +259,7 @@ func TestRouterLookup(t *testing.T) {
 	}
 	wantParams := Params{Param{"name", "gopher"}}
 
-	router := Basic()
+	router, _ := Basic()
 
 	// try empty router first
 	handle, _, tsr := router.Lookup("GET", "/nope")
@@ -314,7 +314,7 @@ func (mfs *mockFileSystem) Open(name string) (http.File, error) {
 }
 
 func TestRouterServeFiles(t *testing.T) {
-	router := Basic()
+	router, _ := Basic()
 	mfs := &mockFileSystem{}
 
 	recv := catchPanic(func() {

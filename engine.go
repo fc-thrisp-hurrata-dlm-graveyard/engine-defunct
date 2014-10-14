@@ -19,31 +19,11 @@ type (
 		trees map[string]*node
 		*Group
 		cache   sync.Pool
-		signals signal
 		logger  *log.Logger
+		signals signal
 		*conf
 	}
-
-	conf struct {
-		ServePanic            bool
-		RedirectTrailingSlash bool
-		RedirectFixedPath     bool
-		HTMLStatus            bool
-		LoggingOn             bool
-		MaxFormMemory         int64
-	}
 )
-
-func defaultconf() *conf {
-	return &conf{
-		ServePanic:            true,
-		RedirectTrailingSlash: true,
-		RedirectFixedPath:     true,
-		HTMLStatus:            false,
-		LoggingOn:             false,
-		MaxFormMemory:         1000000,
-	}
-}
 
 // Empty returns an empty Engine with zero configuration.
 func Empty() *Engine {
@@ -52,22 +32,28 @@ func Empty() *Engine {
 
 // New produces a new engine, with default configuration, a base group, method
 // for retrieving a new Ctx, and signalling.
-func New() *Engine {
-	engine := Empty()
+func New(opts ...Conf) (engine *Engine, err error) {
+	engine = Empty()
 	engine.conf = defaultconf()
 	engine.Group = NewGroup("/", engine)
 	engine.cache.New = engine.newContext
 	engine.signals = engine.NewSignaller()
-	return engine
+	err = engine.SetConf(opts...)
+	if err != nil {
+		return nil, err
+	}
+	return engine, nil
 }
 
 // Basic produces a new engine with LoggingOn set to true and visible logging.
-func Basic() *Engine {
-	engine := New()
-	engine.LoggingOn = true
-	engine.logger = log.New(os.Stdout, "[Engine]", 0)
+func Basic(opts ...Conf) (engine *Engine, err error) {
+	opts = append(opts, LoggingOn(true), Logger(log.New(os.Stdout, "[Engine]", 0)))
+	engine, err = New(opts...)
+	if err != nil {
+		return nil, err
+	}
 	go engine.LogSignal()
-	return engine
+	return engine, nil
 }
 
 // Registers a new request Manage function with the given path and method.
@@ -214,4 +200,8 @@ func (engine *Engine) Run(addr string) {
 	if err := http.ListenAndServe(addr, engine); err != nil {
 		panic(err)
 	}
+}
+
+func init() {
+	//logger *log.Logger
 }
