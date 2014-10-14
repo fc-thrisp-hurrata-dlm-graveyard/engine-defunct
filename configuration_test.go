@@ -2,28 +2,48 @@ package engine
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"reflect"
+
 	"testing"
 )
 
-func testConf(c Conf, fname string, expected interface{}, t *testing.T) {
-	e, _ := Basic()
-	err := e.SetConf(c)
+type testitem struct {
+	c        Conf
+	fname    string
+	expected interface{}
+}
+
+func testConf(testitems []*testitem, t *testing.T) {
+	e, _ := New()
+	var c []Conf
+	for _, tt := range testitems {
+		c = append(c, tt.c)
+	}
+	err := e.SetConf(c...)
 	if err != nil {
-		t.Errorf(fmt.Sprintf("error with configuration setting %+v: %+v", fname, err))
+		t.Errorf(fmt.Sprintf("Engine returned configuration error: %+v", err))
 	}
 	val := reflect.ValueOf(e).Elem()
-	f := val.FieldByName(fname)
-	if f.Interface() != expected {
-		t.Errorf(fmt.Sprintf("%s: %+v should equal %v\n", fname, f.Interface(), expected))
+	for _, ci := range testitems {
+		f := val.FieldByName(ci.fname)
+		if f.Interface() != ci.expected {
+			t.Errorf(fmt.Sprintf("engine.%s is %+v, but should be %v\n", ci.fname, f.Interface(), ci.expected))
+		}
 	}
 }
 
 func TestConf(t *testing.T) {
-	testConf(ServePanic(false), "ServePanic", false, t)
-	testConf(RedirectTrailingSlash(false), "RedirectTrailingSlash", false, t)
-	testConf(RedirectFixedPath(false), "RedirectFixedPath", false, t)
-	testConf(HTMLStatus(true), "HTMLStatus", true, t)
-	testConf(LoggingOn(false), "LoggingOn", false, t)
-	testConf(MaxFormMemory(500), "MaxFormMemory", int64(500), t)
+	l := log.New(os.Stdout, "[TEST]", 0)
+	tc := []*testitem{
+		&testitem{ServePanic(false), "ServePanic", false},
+		&testitem{RedirectTrailingSlash(false), "RedirectTrailingSlash", false},
+		&testitem{RedirectFixedPath(false), "RedirectFixedPath", false},
+		&testitem{HTMLStatus(true), "HTMLStatus", true},
+		&testitem{LoggingOn(true), "LoggingOn", true},
+		&testitem{Logger(l), "Logger", l},
+		&testitem{MaxFormMemory(500), "MaxFormMemory", int64(500)},
+	}
+	testConf(tc, t)
 }

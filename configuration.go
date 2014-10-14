@@ -65,7 +65,7 @@ func HTMLStatus(b bool) Conf {
 
 func Logger(l *log.Logger) Conf {
 	return func(e *Engine) error {
-		e.logger = l
+		e.Logger = l
 		return nil
 	}
 }

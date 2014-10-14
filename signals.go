@@ -17,8 +17,8 @@ func (e *Engine) SendSignal(msg string) {
 
 func (e *Engine) LogSignal() {
 	for msg := range e.signals {
-		if e.logger != nil {
-			e.logger.Printf(" %s", msg)
+		if e.Logger != nil {
+			e.Logger.Printf(" %s", msg)
 		} else {
 			log.Printf("[ENGINE] %s", msg)
 		}

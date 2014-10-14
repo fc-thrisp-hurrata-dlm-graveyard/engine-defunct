@@ -19,7 +19,7 @@ type (
 		trees map[string]*node
 		*Group
 		cache   sync.Pool
-		logger  *log.Logger
+		Logger  *log.Logger
 		signals signal
 		*conf
 	}
