@@ -201,7 +201,3 @@ func (engine *Engine) Run(addr string) {
 		panic(err)
 	}
 }
-
-func init() {
-	//logger *log.Logger
-}

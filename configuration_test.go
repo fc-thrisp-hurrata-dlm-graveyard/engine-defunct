@@ -26,10 +26,10 @@ func testConf(testitems []*testitem, t *testing.T) {
 		t.Errorf(fmt.Sprintf("Engine returned configuration error: %+v", err))
 	}
 	val := reflect.ValueOf(e).Elem()
-	for _, ci := range testitems {
-		f := val.FieldByName(ci.fname)
-		if f.Interface() != ci.expected {
-			t.Errorf(fmt.Sprintf("engine.%s is %+v, but should be %v\n", ci.fname, f.Interface(), ci.expected))
+	for _, tt := range testitems {
+		f := val.FieldByName(tt.fname)
+		if f.Interface() != tt.expected {
+			t.Errorf(fmt.Sprintf("engine.%s is %+v, but should be %v\n", tt.fname, f.Interface(), tt.expected))
 		}
 	}
 }
