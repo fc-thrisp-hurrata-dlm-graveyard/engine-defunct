@@ -17,8 +17,11 @@ func (e *Engine) NewSignaller() signal {
 }
 
 func (e *Engine) SendSignal(head string, content string) {
-	msg := &Msg{head, content}
-	e.signals <- msg
+	e.signals <- &Msg{head, content}
+}
+
+func (e *Engine) DoLog(msg string) {
+	e.signals <- &Msg{"do-log", msg}
 }
 
 func (e *Engine) LogSignal(watch string) {

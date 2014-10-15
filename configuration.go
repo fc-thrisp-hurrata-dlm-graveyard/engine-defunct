@@ -2,6 +2,7 @@ package engine
 
 import (
 	"log"
+	"os"
 	"reflect"
 )
 
@@ -67,12 +68,17 @@ func HTMLStatus(b bool) Conf {
 func Logger(l *log.Logger) Conf {
 	return func(e *Engine) error {
 		e.Logger = l
+		LoggingOn(true)
 		return nil
 	}
 }
 
 func LoggingOn(b bool) Conf {
 	return func(e *Engine) error {
+		if b == true {
+			go e.LogSignal("do-log")
+		}
+		e.Logger = log.New(os.Stdout, "[Engine]", 0)
 		return e.SetConfBool("LoggingOn", b)
 	}
 }

@@ -134,28 +134,30 @@ func PanicHandle(c *Ctx) {
 	var auffer bytes.Buffer
 	for _, p := range panics {
 		sig := fmt.Sprintf("encountered an internal error: %s\n-----\n%s\n-----\n", p.Err, p.Meta)
-		go c.engine.SendSignal("do-log", sig)
+		go c.engine.DoLog(sig)
 		if !c.engine.LoggingOn {
 			log.Printf("[ENGINE]\n %s", sig)
 		}
-		reader := bufio.NewReader(bytes.NewReader([]byte(fmt.Sprintf("%s", p.Meta))))
-		var err error
-		lineno := 0
-		var buffer bytes.Buffer
-		for err == nil {
-			lineno++
-			l, _, err := reader.ReadLine()
-			if lineno%2 == 0 {
-				buffer.WriteString(fmt.Sprintf("\n%s</p>\n", l))
-			} else {
-				buffer.WriteString(fmt.Sprintf("<p>%s\n", l))
+		if c.engine.ServePanic {
+			reader := bufio.NewReader(bytes.NewReader([]byte(fmt.Sprintf("%s", p.Meta))))
+			var err error
+			lineno := 0
+			var buffer bytes.Buffer
+			for err == nil {
+				lineno++
+				l, _, err := reader.ReadLine()
+				if lineno%2 == 0 {
+					buffer.WriteString(fmt.Sprintf("\n%s</p>\n", l))
+				} else {
+					buffer.WriteString(fmt.Sprintf("<p>%s\n", l))
+				}
+				if err != nil {
+					break
+				}
 			}
-			if err != nil {
-				break
-			}
+			pb := fmt.Sprintf(panicBlock, p.Err, buffer.String())
+			auffer.WriteString(pb)
 		}
-		pb := fmt.Sprintf(panicBlock, p.Err, buffer.String())
-		auffer.WriteString(pb)
 	}
 	if c.engine.ServePanic {
 		servePanic := fmt.Sprintf(panicHtml, auffer.String())

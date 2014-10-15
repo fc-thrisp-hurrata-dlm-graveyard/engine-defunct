@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -21,13 +22,18 @@ type (
 		Form    url.Values
 		// Files tbd
 		Errors errorMsgs
-		*Recorder
+		*recorder
 	}
 
-	Recorder struct {
-		start     time.Time
-		stop      time.Time
-		requester string
+	recorder struct {
+		start     time.Time     `json:"start,string"`
+		stop      time.Time     `json:"stop,string"`
+		latency   time.Duration `json:"latency,omitempty"`
+		status    int           `json:"status,string"`
+		method    string        `json:"method"`
+		path      string        `json:"path,omitempty"`
+		requester string        `json:"requester,omitempty"`
+		Extra     string        `json:"extra,omitempty,string"`
 	}
 )
 
@@ -40,6 +46,8 @@ func (engine *Engine) newContext() interface{} {
 func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request) *Ctx {
 	c := engine.cache.Get().(*Ctx)
 	c.rwmem.reset(w)
+	c.recorder = &recorder{}
+	c.Start()
 	c.Request = req
 	req.ParseMultipartForm(engine.MaxFormMemory)
 	c.Form = req.Form
@@ -47,11 +55,17 @@ func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request) *Ctx 
 }
 
 func (engine *Engine) putContext(c *Ctx) {
-	go engine.SendSignal("do-log", fmt.Sprintf("%d %s %s", c.RW.Status(), c.Request.Method, c.Request.URL.Path))
+	c.PostProcess(c.Request, c.RW)
+	if engine.LoggingOn {
+		go engine.DoLog(c.LogFmt())
+	} else {
+		engine.SendSignal("recorder", c.Fmt())
+	}
 	c.group = nil
 	c.Request = nil
 	c.Params = nil
 	c.Form = nil
+	c.recorder = nil
 	engine.cache.Put(c)
 }
 
@@ -108,6 +122,55 @@ func (c *Ctx) Status(code int) {
 	}
 }
 
-func (r *Recorder) Latency() time.Duration {
+func (r *recorder) Start() {
+	r.start = time.Now()
+}
+
+func (r *recorder) Stop() {
+	r.stop = time.Now()
+}
+
+func (r *recorder) Requester(req *http.Request) {
+	rqstr := req.Header.Get("X-Real-IP")
+
+	if len(rqstr) == 0 {
+		rqstr = req.Header.Get("X-Forwarded-For")
+	}
+
+	if len(rqstr) == 0 {
+		rqstr = req.RemoteAddr
+	}
+
+	r.requester = rqstr
+}
+
+func (r *recorder) Latency() time.Duration {
 	return r.stop.Sub(r.start)
+}
+
+func (r *recorder) PostProcess(req *http.Request, rw ResponseWriter) {
+	r.Stop()
+	r.latency = r.Latency()
+	r.Requester(req)
+	r.method = req.Method
+	r.path = req.URL.Path
+	r.status = rw.Status()
+}
+
+func (r *recorder) Fmt() string {
+	b, err := json.Marshal(r)
+	if err != nil {
+		return newError("recorder formatting error: %s", err).Error()
+	}
+	return string(b)
+}
+
+func (r *recorder) LogFmt() string {
+	return fmt.Sprintf("%v |%s %3d %s| %12v | %s |%s %s %-7s %s",
+		r.stop.Format("2006/01/02 - 15:04:05"),
+		StatusColor(r.status), r.status, reset,
+		r.latency,
+		r.requester,
+		MethodColor(r.method), reset, r.method,
+		r.path)
 }

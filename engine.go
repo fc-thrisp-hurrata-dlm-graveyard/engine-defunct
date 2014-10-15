@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"sync"
 )
 
@@ -45,14 +44,13 @@ func New(opts ...Conf) (engine *Engine, err error) {
 	return engine, nil
 }
 
-// Basic produces a new engine with LoggingOn set to true and visible logging.
+// Basic produces a new engine with LoggingOn set to true and a default logger.
 func Basic(opts ...Conf) (engine *Engine, err error) {
-	opts = append(opts, LoggingOn(true), Logger(log.New(os.Stdout, "[Engine]", 0)))
+	opts = append(opts, LoggingOn(true))
 	engine, err = New(opts...)
 	if err != nil {
 		return nil, err
 	}
-	go engine.LogSignal("do-log")
 	return engine, nil
 }
 
