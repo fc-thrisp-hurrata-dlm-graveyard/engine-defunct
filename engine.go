@@ -52,7 +52,7 @@ func Basic(opts ...Conf) (engine *Engine, err error) {
 	if err != nil {
 		return nil, err
 	}
-	go engine.LogSignal()
+	go engine.LogSignal("do-log")
 	return engine, nil
 }
 

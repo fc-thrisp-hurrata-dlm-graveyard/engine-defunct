@@ -27,6 +27,7 @@ func testCustomException(code int, t *testing.T) {
 	expected := fmt.Sprintf("CUSTOM %d", code)
 	e, _ := New()
 	e.HttpStatuses[code].Update(func(c *Ctx) { c.RW.Write([]byte(expected)) })
+
 	e.Handle("/test", "GET", func(c *Ctx) { c.Status(code) })
 
 	w := PerformRequest(e, "GET", "/test")

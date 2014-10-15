@@ -134,7 +134,7 @@ func PanicHandle(c *Ctx) {
 	var auffer bytes.Buffer
 	for _, p := range panics {
 		sig := fmt.Sprintf("encountered an internal error: %s\n-----\n%s\n-----\n", p.Err, p.Meta)
-		go c.engine.SendSignal(sig)
+		go c.engine.SendSignal("do-log", sig)
 		if !c.engine.LoggingOn {
 			log.Printf("[ENGINE]\n %s", sig)
 		}

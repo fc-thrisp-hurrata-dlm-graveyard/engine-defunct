@@ -6,7 +6,8 @@ import (
 )
 
 type (
-	// A configuration function that takes an engine pointer.
+	// A configuration function that takes an engine pointer, configures the
+	// engine within the function, and returns an error.
 	Conf func(*Engine) error
 
 	conf struct {

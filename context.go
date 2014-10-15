@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type (
@@ -20,6 +21,13 @@ type (
 		Form    url.Values
 		// Files tbd
 		Errors errorMsgs
+		*Recorder
+	}
+
+	Recorder struct {
+		start     time.Time
+		stop      time.Time
+		requester string
 	}
 )
 
@@ -39,7 +47,7 @@ func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request) *Ctx 
 }
 
 func (engine *Engine) putContext(c *Ctx) {
-	go engine.SendSignal(fmt.Sprintf("%d %s %s", c.RW.Status(), c.Request.Method, c.Request.URL.Path))
+	go engine.SendSignal("do-log", fmt.Sprintf("%d %s %s", c.RW.Status(), c.Request.Method, c.Request.URL.Path))
 	c.group = nil
 	c.Request = nil
 	c.Params = nil
@@ -98,4 +106,8 @@ func (c *Ctx) Status(code int) {
 			status.Handlers[i](c)
 		}
 	}
+}
+
+func (r *Recorder) Latency() time.Duration {
+	return r.stop.Sub(r.start)
 }
