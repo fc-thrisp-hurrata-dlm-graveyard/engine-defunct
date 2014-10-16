@@ -16,6 +16,7 @@ type (
 	// signaling, in addition to configuration options.
 	Engine struct {
 		trees map[string]*node
+		groups
 		*Group
 		cache   sync.Pool
 		Logger  *log.Logger
@@ -34,6 +35,7 @@ func Empty() *Engine {
 func New(opts ...Conf) (engine *Engine, err error) {
 	engine = Empty()
 	engine.conf = defaultconf()
+	engine.groups = make(groups)
 	engine.Group = NewGroup("/", engine)
 	engine.cache.New = engine.newContext
 	engine.signals = engine.NewSignaller()
@@ -130,14 +132,12 @@ func (e *Engine) rcvr(c *Ctx) {
 	if rcv := recover(); rcv != nil {
 		p := newError(fmt.Sprintf("%s", rcv))
 		c.errorTyped(p, ErrorTypePanic, stack(3))
-		c.group = e.Group
 		c.Status(500)
 	}
 }
 
 // internal "not found"
 func (e *Engine) ntfnd(c *Ctx) {
-	c.group = e.Group
 	c.Status(404)
 }
 

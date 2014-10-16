@@ -45,6 +45,7 @@ func (engine *Engine) newContext() interface{} {
 
 func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request) *Ctx {
 	c := engine.cache.Get().(*Ctx)
+	c.group = engine.groups["/"]
 	c.rwmem.reset(w)
 	c.recorder = &recorder{}
 	c.Start()

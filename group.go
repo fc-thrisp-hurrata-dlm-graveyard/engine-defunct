@@ -3,6 +3,8 @@ package engine
 import "path/filepath"
 
 type (
+	groups map[string]*Group
+
 	Group struct {
 		prefix string
 		engine *Engine
@@ -20,17 +22,21 @@ func (group *Group) pathFor(path string) string {
 	return joined
 }
 
-// NewGroup creates a group with no parent and the provided prefix, usually as
-// a primary engine Group
+// NewGroup creates a group with no parent and the provided prefix.
 func NewGroup(prefix string, engine *Engine) *Group {
-	return &Group{prefix: prefix,
-		engine:       engine,
-		HttpStatuses: defaultHttpStatuses()}
+	if group, exists := engine.groups[prefix]; exists {
+		return group
+	} else {
+		newgroup := &Group{prefix: prefix,
+			engine:       engine,
+			HttpStatuses: defaultHttpStatuses()}
+		engine.groups[prefix] = newgroup
+		return newgroup
+	}
 }
 
 // New creates a group from an existing group using the component string as a
-// prefix for all subsequent route attachments to the group. The existing group
-// will be the parent of the new group, and both will share the same engine
+// prefix. The existing group will be the nominal parent of the new group.
 func (group *Group) New(component string) *Group {
 	prefix := group.pathFor(component)
 	newgroup := NewGroup(prefix, group.engine)
