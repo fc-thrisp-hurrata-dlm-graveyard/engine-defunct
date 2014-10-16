@@ -20,7 +20,7 @@ type (
 		Request *http.Request
 		Params  Params
 		Form    url.Values
-		// Files tbd
+		//Files
 		Errors errorMsgs
 		*recorder
 	}
@@ -31,7 +31,7 @@ type (
 		latency   time.Duration `json:"latency,omitempty"`
 		status    int           `json:"status,string"`
 		method    string        `json:"method"`
-		path      string        `json:"path,omitempty"`
+		path      string        `json:"path"`
 		requester string        `json:"requester,omitempty"`
 		Extra     string        `json:"extra,omitempty,string"`
 	}
@@ -59,13 +59,14 @@ func (engine *Engine) putContext(c *Ctx) {
 	if engine.LoggingOn {
 		go engine.DoLog(c.LogFmt())
 	} else {
-		engine.SendSignal("recorder", c.Fmt())
+		go engine.SendSignal("recorder", c.Fmt())
 	}
 	c.group = nil
 	c.Request = nil
 	c.Params = nil
 	c.Form = nil
 	c.recorder = nil
+	c.Errors = nil
 	engine.cache.Put(c)
 }
 

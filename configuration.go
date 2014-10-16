@@ -65,14 +65,19 @@ func HTMLStatus(b bool) Conf {
 	}
 }
 
+// Logger specifies a log.Logger, and sets LoggingOn to true, and capturing
+// signals with Head labeled "do-log"
 func Logger(l *log.Logger) Conf {
 	return func(e *Engine) error {
 		e.Logger = l
-		LoggingOn(true)
+		e.SetConfBool("LoggingOn", true)
+		go e.LogSignal("do-log")
 		return nil
 	}
 }
 
+// LogginOn sets Logger to a default log.Logger, sets LoggingOn to true, and
+// capturing signals with Head labeled "do-log"
 func LoggingOn(b bool) Conf {
 	return func(e *Engine) error {
 		if b == true {
