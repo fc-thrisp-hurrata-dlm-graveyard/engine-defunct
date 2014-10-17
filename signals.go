@@ -16,12 +16,20 @@ func (e *Engine) NewSignaller() signal {
 	return s
 }
 
-func (e *Engine) SendSignal(head string, content string) {
-	e.signals <- &Msg{head, content}
+func (e *Engine) sendsignal(m *Msg) {
+	e.signals <- m
 }
 
-func (e *Engine) DoLog(msg string) {
-	e.signals <- &Msg{"do-log", msg}
+func (e *Engine) Signal(m *Msg) {
+	go e.sendsignal(m)
+}
+
+func DoSignal(head string, content string) *Msg {
+	return &Msg{head, content}
+}
+
+func DoLog(content string) *Msg {
+	return &Msg{"do-log", content}
 }
 
 func (e *Engine) LogSignal(watch string) {

@@ -1,13 +1,11 @@
 ##Changelog
 
-###Engine 0.1.1 (10.17.2014)
-
-- fix documentation
-
 ###Engine 0.1.0 (10.17.2014)
 
 - semantic versioning
 - eliminate group duplication
+- function based configuration options
+- request logging & associated cycle 
 
 ###Engine 0.0.2 (10.10.2014)
 

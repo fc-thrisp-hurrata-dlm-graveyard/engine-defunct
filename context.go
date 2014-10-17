@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"time"
@@ -20,8 +21,8 @@ type (
 		Request *http.Request
 		Params  Params
 		Form    url.Values
-		//Files
-		Errors errorMsgs
+		Files   map[string][]*multipart.FileHeader
+		Errors  errorMsgs
 		*recorder
 	}
 
@@ -50,17 +51,16 @@ func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request) *Ctx 
 	c.recorder = &recorder{}
 	c.Start()
 	c.Request = req
-	req.ParseMultipartForm(engine.MaxFormMemory)
-	c.Form = req.Form
+	c.parseform()
 	return c
 }
 
 func (engine *Engine) putContext(c *Ctx) {
 	c.PostProcess(c.Request, c.RW)
 	if engine.LoggingOn {
-		go engine.DoLog(c.LogFmt())
+		engine.Signal(DoLog(c.LogFmt()))
 	} else {
-		go engine.SendSignal("recorder", c.Fmt())
+		engine.Signal(DoSignal("recorder", c.Fmt()))
 	}
 	c.group = nil
 	c.Request = nil
@@ -69,6 +69,14 @@ func (engine *Engine) putContext(c *Ctx) {
 	c.recorder = nil
 	c.Errors = nil
 	engine.cache.Put(c)
+}
+
+func (c *Ctx) parseform() {
+	c.Request.ParseMultipartForm(c.engine.MaxFormMemory)
+	c.Form = c.Request.Form
+	if c.Request.MultipartForm != nil {
+		c.Files = c.Request.MultipartForm.File
+	}
 }
 
 func (c *Ctx) errorTyped(err error, typ uint32, meta interface{}) {
