@@ -7,8 +7,8 @@ type (
 
 	Group struct {
 		prefix string
-		engine *Engine
 		parent *Group
+		engine *Engine
 		HttpStatuses
 	}
 )
