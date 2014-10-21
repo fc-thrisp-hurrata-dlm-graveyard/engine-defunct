@@ -23,36 +23,43 @@ func SignalQueue(e *Engine) {
 		for {
 			select {
 			case sig := <-e.Signals:
-				e.Log(fmt.Sprintf("%s", sig))
+				e.Message(fmt.Sprintf("%s", sig))
 			}
 		}
 	}()
 }
 
-func (e *Engine) Log(message string) {
+func (e *Engine) Message(message string) {
 	if e.LoggingOn {
 		e.Logger.Printf(" %s", message)
 	}
 }
 
 func (e *Engine) PanicsNow(message string) {
-	log.Println(fmt.Errorf("[ENGINE-PANIC] %s", message))
+	log.Println(fmt.Errorf("[ENGINE] %s", message))
 	e.Signals <- []byte("Engine-Panic")
 }
 
-func (e *Engine) Send(q string, message string) {
+// Send sends a message to the specified queue.
+func (e *Engine) Send(queue string, message string) {
 	go func() {
-		if queue, ok := e.Queues[q]; ok {
-			queue(message)
+		if q, ok := e.Queues[queue]; ok {
+			q(message)
 		} else {
-			e.Signals <- []byte(message)
+			e.SendSignal(message)
 		}
 	}()
 }
 
+// SendSignal sends a signal as []byte directly to engine.Signals
+func (e *Engine) SendSignal(message string) {
+	e.Signals <- []byte(message)
+}
+
 func (e *Engine) defaultqueues() queues {
 	q := make(queues)
-	q["messages"] = e.Log
+	q["messages"] = e.Message
 	q["panics-now"] = e.PanicsNow
+	q["signal"] = e.SendSignal
 	return q
 }

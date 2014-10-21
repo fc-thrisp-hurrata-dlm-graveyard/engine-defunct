@@ -75,8 +75,7 @@ func Logger(l *log.Logger) Conf {
 	}
 }
 
-// LogginOn sets Logger to a default log.Logger, sets LoggingOn to true, and
-// capturing signals with Head labeled "do-log"
+// LogginOn sets Logger to a default log.Logger and sets LoggingOn to true.
 func LoggingOn(b bool) Conf {
 	return func(e *Engine) error {
 		e.Logger = log.New(os.Stdout, "[Engine]", 0)

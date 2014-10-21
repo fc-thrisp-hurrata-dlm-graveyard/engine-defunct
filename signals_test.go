@@ -1,11 +1,27 @@
 package engine
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func testSignal(method string, t *testing.T) {
 	var sent bool = false
 
-	e, _ := Basic()
+	e, _ := New()
+
+	testsignalq := func() {
+		go func() {
+			for {
+				select {
+				case sig := <-e.Signals:
+					fmt.Printf("test signals: %s\n", sig)
+				}
+			}
+		}()
+	}
+
+	testsignalq()
 
 	testqueue := func(s string) {
 		if s != "SENT" {
@@ -17,7 +33,9 @@ func testSignal(method string, t *testing.T) {
 
 	e.Handle("/test_signal_sent", method, func(c *Ctx) {
 		sent = true
-		e.Send("testqueue", "SENT")
+		for i := 0; i < 100; i++ {
+			e.Send("testqueue", "SENT")
+		}
 	})
 
 	PerformRequest(e, method, "/test_signal_sent")
@@ -28,35 +46,12 @@ func testSignal(method string, t *testing.T) {
 
 }
 
-func testSignalTrue(method string, t *testing.T) {
-	var sent bool = false
-
-	e, _ := Basic()
-
-	testtrue := func(s string) {
-		if s != "true" {
-			t.Errorf("Read signal is not `true`")
-		}
-	}
-
-	e.Queues["testtrue"] = testtrue
-
-	e.Handle("/test_signal_true", method, func(c *Ctx) {
-		sent = true
-		for i := 0; i < 100; i++ {
-			e.Send("testtrue", "true")
-		}
-	})
-
-	PerformRequest(e, method, "/test_signal_true")
-
-	if sent == false {
-		t.Errorf("Signal handler was not invoked.")
-	}
-}
-
 func TestSignal(t *testing.T) {
 	t.Parallel()
+	testSignal("POST", t)
+	testSignal("DELETE", t)
+	testSignal("PUT", t)
+	testSignal("PATCH", t)
+	testSignal("OPTIONS", t)
 	testSignal("HEAD", t)
-	testSignalTrue("HEAD", t)
 }
