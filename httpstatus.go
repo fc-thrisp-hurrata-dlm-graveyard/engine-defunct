@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -134,10 +133,7 @@ func PanicHandle(c *Ctx) {
 	var auffer bytes.Buffer
 	for _, p := range panics {
 		sig := fmt.Sprintf("encountered an internal error: %s\n-----\n%s\n-----\n", p.Err, p.Meta)
-		c.engine.Signal(DoLog(sig))
-		if !c.engine.LoggingOn {
-			log.Printf("[ENGINE]\n %s", sig)
-		}
+		c.engine.Send("panics-now", sig)
 		if c.engine.ServePanic {
 			reader := bufio.NewReader(bytes.NewReader([]byte(fmt.Sprintf("%s", p.Meta))))
 			var err error

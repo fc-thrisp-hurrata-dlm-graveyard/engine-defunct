@@ -35,8 +35,9 @@ func NewGroup(prefix string, engine *Engine) *Group {
 	}
 }
 
-// New creates a group from an existing group using the component string as a
-// prefix. The existing group will be the nominal parent of the new group.
+// New creates a group from an existing group using the the groups prefix and
+// the provided component string as a prefix. The existing group will be the
+// parent of the new group.
 func (group *Group) New(component string) *Group {
 	prefix := group.pathFor(component)
 	newgroup := NewGroup(prefix, group.engine)

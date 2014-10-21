@@ -20,7 +20,8 @@ type (
 		*Group
 		cache   sync.Pool
 		Logger  *log.Logger
-		signals signal
+		Signals Signals
+		Queues  queues
 		*conf
 	}
 )
@@ -38,7 +39,8 @@ func New(opts ...Conf) (engine *Engine, err error) {
 	engine.groups = make(groups)
 	engine.Group = NewGroup("/", engine)
 	engine.cache.New = engine.newContext
-	engine.signals = engine.NewSignaller()
+	engine.Signals = make(Signals, 100)
+	engine.Queues = engine.defaultqueues()
 	err = engine.SetConf(opts...)
 	if err != nil {
 		return nil, err

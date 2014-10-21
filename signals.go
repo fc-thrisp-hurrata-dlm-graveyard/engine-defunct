@@ -1,45 +1,58 @@
 package engine
 
-import "log"
-
-type (
-	signal chan *Msg
-
-	Msg struct {
-		Head    string
-		Content string
-	}
+import (
+	"fmt"
+	"log"
 )
 
-func (e *Engine) NewSignaller() signal {
-	s := make(signal, 1)
-	return s
-}
+type (
+	// Signal denotes a byte signal
+	Signal []byte
 
-func (e *Engine) sendsignal(m *Msg) {
-	e.signals <- m
-}
+	// Signals is a channel for Signal
+	Signals chan Signal
 
-func (e *Engine) Signal(m *Msg) {
-	go e.sendsignal(m)
-}
+	queue func(string)
 
-func DoSignal(head string, content string) *Msg {
-	return &Msg{head, content}
-}
+	queues map[string]queue
+)
 
-func DoLog(content string) *Msg {
-	return &Msg{"do-log", content}
-}
-
-func (e *Engine) LogSignal(watch string) {
-	for msg := range e.signals {
-		if msg.Head == watch {
-			if e.Logger != nil {
-				e.Logger.Printf(" %s", msg.Content)
-			} else {
-				log.Printf("[ENGINE] %s", msg.Content)
+// A simple Signal queue outputting everything emitted to engine.Signals.
+func SignalQueue(e *Engine) {
+	go func() {
+		for {
+			select {
+			case sig := <-e.Signals:
+				e.Log(fmt.Sprintf("%s", sig))
 			}
 		}
+	}()
+}
+
+func (e *Engine) Log(message string) {
+	if e.LoggingOn {
+		e.Logger.Printf(" %s", message)
 	}
+}
+
+func (e *Engine) PanicsNow(message string) {
+	log.Println(fmt.Errorf("[ENGINE-PANIC] %s", message))
+	e.Signals <- []byte("Engine-Panic")
+}
+
+func (e *Engine) Send(q string, message string) {
+	go func() {
+		if queue, ok := e.Queues[q]; ok {
+			queue(message)
+		} else {
+			e.Signals <- []byte(message)
+		}
+	}()
+}
+
+func (e *Engine) defaultqueues() queues {
+	q := make(queues)
+	q["messages"] = e.Log
+	q["panics-now"] = e.PanicsNow
+	return q
 }

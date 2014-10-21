@@ -1,5 +1,10 @@
 ##Changelog
 
+###Engine 0.1.1 ()
+
+- file uploading
+- clearer signals with less verbose calls
+
 ###Engine 0.1.0 (10.17.2014)
 
 - semantic versioning

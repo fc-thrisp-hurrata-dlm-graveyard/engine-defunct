@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"mime/multipart"
@@ -27,14 +26,13 @@ type (
 	}
 
 	recorder struct {
-		start     time.Time     `json:"start,string"`
-		stop      time.Time     `json:"stop,string"`
-		latency   time.Duration `json:"latency,omitempty"`
-		status    int           `json:"status,string"`
-		method    string        `json:"method"`
-		path      string        `json:"path"`
-		requester string        `json:"requester,omitempty"`
-		Extra     string        `json:"extra,omitempty,string"`
+		start     time.Time
+		stop      time.Time
+		latency   time.Duration
+		status    int
+		method    string
+		path      string
+		requester string
 	}
 )
 
@@ -58,9 +56,9 @@ func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request) *Ctx 
 func (engine *Engine) putContext(c *Ctx) {
 	c.PostProcess(c.Request, c.RW)
 	if engine.LoggingOn {
-		engine.Signal(DoLog(c.LogFmt()))
+		engine.Log(c.LogFmt())
 	} else {
-		engine.Signal(DoSignal("recorder", c.Fmt()))
+		engine.Send("messages", c.Fmt())
 	}
 	c.group = nil
 	c.Request = nil
@@ -168,11 +166,7 @@ func (r *recorder) PostProcess(req *http.Request, rw ResponseWriter) {
 }
 
 func (r *recorder) Fmt() string {
-	b, err := json.Marshal(r)
-	if err != nil {
-		return newError("recorder formatting error: %s", err).Error()
-	}
-	return string(b)
+	return fmt.Sprintf("recorder	%s	%s	%s	%d	%s	%s	%s", r.start, r.stop, r.latency, r.status, r.method, r.path, r.requester)
 }
 
 func (r *recorder) LogFmt() string {

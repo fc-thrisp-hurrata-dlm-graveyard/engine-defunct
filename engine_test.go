@@ -9,10 +9,10 @@ import (
 	"testing"
 )
 
-func PerformRequest(r http.Handler, method, path string) *httptest.ResponseRecorder {
+func PerformRequest(h http.Handler, method string, path string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest(method, path, nil)
 	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
+	h.ServeHTTP(w, req)
 	return w
 }
 
@@ -42,6 +42,7 @@ func testRouteOK(method string, t *testing.T) {
 }
 
 func TestRouteOK(t *testing.T) {
+	t.Parallel()
 	testRouteOK("POST", t)
 	testRouteOK("DELETE", t)
 	testRouteOK("PATCH", t)
@@ -67,12 +68,13 @@ func testGroupOK(method string, t *testing.T) {
 }
 
 func TestGroupOK(t *testing.T) {
-	testRouteOK("POST", t)
-	testRouteOK("DELETE", t)
-	testRouteOK("PATCH", t)
-	testRouteOK("PUT", t)
-	testRouteOK("OPTIONS", t)
-	testRouteOK("HEAD", t)
+	t.Parallel()
+	testGroupOK("POST", t)
+	testGroupOK("DELETE", t)
+	testGroupOK("PATCH", t)
+	testGroupOK("PUT", t)
+	testGroupOK("OPTIONS", t)
+	testGroupOK("HEAD", t)
 }
 
 func testSubGroupOK(method string, t *testing.T) {
@@ -92,6 +94,7 @@ func testSubGroupOK(method string, t *testing.T) {
 }
 
 func TestSubGroupOK(t *testing.T) {
+	t.Parallel()
 	testSubGroupOK("POST", t)
 	testSubGroupOK("DELETE", t)
 	testSubGroupOK("PATCH", t)
@@ -104,8 +107,8 @@ func testRouteNotOK(method string, t *testing.T) {
 	passed := false
 	e, _ := Basic()
 	othermethod := methodNotMethod(method)
-	e.Handle("/test_2", othermethod, func(c *Ctx) { passed = true })
-	w := PerformRequest(e, method, "/test")
+	e.Handle("/test_not_ok", othermethod, func(c *Ctx) { passed = true })
+	w := PerformRequest(e, method, "/test_not_ok")
 
 	if passed == true {
 		t.Errorf(method + " route handler was invoked, when it should not")
@@ -116,6 +119,7 @@ func testRouteNotOK(method string, t *testing.T) {
 }
 
 func TestRouteNotOK(t *testing.T) {
+	t.Parallel()
 	testRouteNotOK("POST", t)
 	testRouteNotOK("DELETE", t)
 	testRouteNotOK("PATCH", t)
@@ -141,6 +145,7 @@ func (m *mockResponseWriter) WriteString(s string) (n int, err error) {
 func (m *mockResponseWriter) WriteHeader(int) {}
 
 func TestRouter(t *testing.T) {
+	t.Parallel()
 	engine, _ := Basic()
 
 	routed := false
