@@ -56,10 +56,9 @@ func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request) *Ctx 
 func (engine *Engine) putContext(c *Ctx) {
 	c.PostProcess(c.Request, c.RW)
 	if engine.LoggingOn {
-		engine.Log(c.LogFmt())
-	} else {
-		engine.Send("messages", c.Fmt())
+		engine.Send("messages", c.LogFmt())
 	}
+	engine.Send("", c.Fmt())
 	c.group = nil
 	c.Request = nil
 	c.Params = nil
