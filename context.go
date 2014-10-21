@@ -58,7 +58,7 @@ func (engine *Engine) putContext(c *Ctx) {
 	if engine.LoggingOn {
 		engine.Send("messages", c.LogFmt())
 	}
-	engine.Send("", c.Fmt())
+	engine.Send("recorder", c.Fmt())
 	c.group = nil
 	c.Request = nil
 	c.Params = nil

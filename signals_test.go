@@ -1,29 +1,23 @@
 package engine
 
-import (
-	"bytes"
-	"testing"
-)
+import "testing"
 
 func testSignal(method string, t *testing.T) {
 	var sent bool = false
 
 	e, _ := Basic()
 
-	go func() {
-		for {
-			select {
-			case sig := <-e.Signals:
-				if string(sig) != "SENT" {
-					t.Errorf("Read signal is not `SENT`")
-				}
-			}
+	testqueue := func(s string) {
+		if s != "SENT" {
+			t.Errorf("Read signal is not `SENT`")
 		}
-	}()
+	}
+
+	e.Queues["testqueue"] = testqueue
 
 	e.Handle("/test_signal_sent", method, func(c *Ctx) {
 		sent = true
-		e.Send("", "SENT")
+		e.Send("testqueue", "SENT")
 	})
 
 	PerformRequest(e, method, "/test_signal_sent")
@@ -39,22 +33,18 @@ func testSignalTrue(method string, t *testing.T) {
 
 	e, _ := Basic()
 
-	go func() {
-		for {
-			select {
-			case sig := <-e.Signals:
-				if bytes.Compare([]byte("true"), sig) != 0 {
-					t.Errorf("Read signal is not `true`")
-				}
-			}
+	testtrue := func(s string) {
+		if s != "true" {
+			t.Errorf("Read signal is not `true`")
 		}
-	}()
+	}
+
+	e.Queues["testtrue"] = testtrue
 
 	e.Handle("/test_signal_true", method, func(c *Ctx) {
 		sent = true
 		for i := 0; i < 100; i++ {
-			ts := []byte("true")
-			e.Signals <- ts
+			e.Send("testtrue", "true")
 		}
 	})
 
