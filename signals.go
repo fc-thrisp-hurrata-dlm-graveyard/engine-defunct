@@ -5,6 +5,10 @@ import (
 	"log"
 )
 
+var (
+	EnginePanic = []byte("engine-panic")
+)
+
 type (
 	// Signal denotes a byte signal
 	Signal []byte
@@ -20,24 +24,29 @@ type (
 // A simple Signal queue outputting everything emitted to engine.Signals.
 func SignalQueue(e *Engine) {
 	go func() {
-		for {
-			select {
-			case sig := <-e.Signals:
-				e.Message(fmt.Sprintf("%s", sig))
-			}
+		for sig := range e.Signals {
+			e.Message(fmt.Sprintf("%s", sig))
 		}
 	}()
 }
 
+// Message goes directly to a logger, if enbaled.
 func (e *Engine) Message(message string) {
 	if e.LoggingOn {
 		e.Logger.Printf(" %s", message)
 	}
 }
 
-func (e *Engine) PanicsNow(message string) {
+// PanicMessage goes to a standard and unavaoidable log, then emits a signal.
+func (e *Engine) PanicMessage(message string) {
 	log.Println(fmt.Errorf("[ENGINE] %s", message))
-	e.Signals <- []byte("Engine-Panic")
+	e.Signals <- EnginePanic
+	//e.Signals <- []byte(message)
+}
+
+// Emit goes as []byte directly to engine.Signals
+func (e *Engine) Emit(message string) {
+	e.Signals <- []byte(message)
 }
 
 // Send sends a message to the specified queue.
@@ -46,20 +55,15 @@ func (e *Engine) Send(queue string, message string) {
 		if q, ok := e.Queues[queue]; ok {
 			q(message)
 		} else {
-			e.SendSignal(message)
+			e.Emit(message)
 		}
 	}()
 }
 
-// SendSignal sends a signal as []byte directly to engine.Signals
-func (e *Engine) SendSignal(message string) {
-	e.Signals <- []byte(message)
-}
-
 func (e *Engine) defaultqueues() queues {
 	q := make(queues)
-	q["messages"] = e.Message
-	q["panics-now"] = e.PanicsNow
-	q["signal"] = e.SendSignal
+	q["message"] = e.Message
+	q["panic"] = e.PanicMessage
+	q["emit"] = e.Emit
 	return q
 }

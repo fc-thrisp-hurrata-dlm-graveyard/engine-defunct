@@ -12,11 +12,8 @@ func testSignal(method string, t *testing.T) {
 
 	testsignalq := func() {
 		go func() {
-			for {
-				select {
-				case sig := <-e.Signals:
-					fmt.Printf("test signals: %s\n", sig)
-				}
+			for msg := range e.Signals {
+				fmt.Printf("test: %s\n", msg)
 			}
 		}()
 	}
@@ -33,7 +30,7 @@ func testSignal(method string, t *testing.T) {
 
 	e.Handle("/test_signal_sent", method, func(c *Ctx) {
 		sent = true
-		for i := 0; i < 100; i++ {
+		for i := 0; i < 10; i++ {
 			e.Send("testqueue", "SENT")
 		}
 	})
@@ -47,7 +44,6 @@ func testSignal(method string, t *testing.T) {
 }
 
 func TestSignal(t *testing.T) {
-	t.Parallel()
 	testSignal("POST", t)
 	testSignal("DELETE", t)
 	testSignal("PUT", t)

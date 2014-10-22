@@ -42,7 +42,7 @@ func testRouteOK(method string, t *testing.T) {
 }
 
 func TestRouteOK(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	testRouteOK("POST", t)
 	testRouteOK("DELETE", t)
 	testRouteOK("PATCH", t)
@@ -68,7 +68,7 @@ func testGroupOK(method string, t *testing.T) {
 }
 
 func TestGroupOK(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	testGroupOK("POST", t)
 	testGroupOK("DELETE", t)
 	testGroupOK("PATCH", t)
@@ -94,7 +94,7 @@ func testSubGroupOK(method string, t *testing.T) {
 }
 
 func TestSubGroupOK(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	testSubGroupOK("POST", t)
 	testSubGroupOK("DELETE", t)
 	testSubGroupOK("PATCH", t)
@@ -119,7 +119,7 @@ func testRouteNotOK(method string, t *testing.T) {
 }
 
 func TestRouteNotOK(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	testRouteNotOK("POST", t)
 	testRouteNotOK("DELETE", t)
 	testRouteNotOK("PATCH", t)

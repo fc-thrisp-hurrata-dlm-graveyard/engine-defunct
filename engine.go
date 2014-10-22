@@ -39,7 +39,7 @@ func New(opts ...Conf) (engine *Engine, err error) {
 	engine.groups = make(groups)
 	engine.Group = NewGroup("/", engine)
 	engine.cache.New = engine.newContext
-	engine.Signals = make(Signals, 100000) // unsolved as to why this needs to be this high; anything lower results in lost messages during testing
+	engine.Signals = make(Signals, 1000) // unsolved as to why this needs to be this high; anything lower results in lost messages during testing is the size in bytes?
 	engine.Queues = engine.defaultqueues()
 	err = engine.SetConf(opts...)
 	if err != nil {

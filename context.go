@@ -56,7 +56,7 @@ func (engine *Engine) getContext(w http.ResponseWriter, req *http.Request) *Ctx 
 func (engine *Engine) putContext(c *Ctx) {
 	c.PostProcess(c.Request, c.RW)
 	if engine.LoggingOn {
-		engine.Send("messages", c.LogFmt())
+		engine.Send("message", c.LogFmt())
 	}
 	engine.Send("recorder", c.Fmt())
 	c.group = nil
@@ -165,7 +165,7 @@ func (r *recorder) PostProcess(req *http.Request, rw ResponseWriter) {
 }
 
 func (r *recorder) Fmt() string {
-	return fmt.Sprintf("recorder	%s	%s	%s	%d	%s	%s	%s", r.start, r.stop, r.latency, r.status, r.method, r.path, r.requester)
+	return fmt.Sprintf("recorder	%s	%s	%s	%3d	%s	%s	%s", r.start, r.stop, r.latency, r.status, r.method, r.path, r.requester)
 }
 
 func (r *recorder) LogFmt() string {
