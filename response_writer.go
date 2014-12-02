@@ -3,7 +3,7 @@ package engine
 import (
 	"bufio"
 	"errors"
-	"log"
+
 	"net"
 	"net/http"
 )
@@ -41,9 +41,6 @@ func (w *responseWriter) reset(writer http.ResponseWriter) {
 func (w *responseWriter) WriteHeader(code int) {
 	if code > 0 {
 		w.status = code
-		if w.Written() {
-			log.Println("[Engine] WARNING. Headers were already written!")
-		}
 	}
 }
 
