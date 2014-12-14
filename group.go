@@ -1,6 +1,10 @@
 package engine
 
-import "path/filepath"
+import (
+	"path/filepath"
+
+	"golang.org/x/net/context"
+)
 
 type (
 	groups map[string]*Group
@@ -47,9 +51,10 @@ func (group *Group) New(component string) *Group {
 
 // Handle provides a route, method, and Manage to the router, and creates
 // a function using the handler when the router matches the route and method.
-func (group *Group) Handle(route string, method string, handler Manage) {
-	group.engine.Manage(method, group.pathFor(route), func(c *Ctx) {
-		c.group = group
-		handler(c)
+func (group *Group) Handle(route string, method string, handler func(context.Context)) {
+	group.engine.Manage(method, group.pathFor(route), func(c context.Context) {
+		curr := currentCtx(c)
+		curr.group = group
+		handler(context.WithValue(c, "Current", curr))
 	})
 }

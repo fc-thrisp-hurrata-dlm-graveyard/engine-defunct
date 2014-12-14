@@ -3,6 +3,8 @@ package engine
 import (
 	"fmt"
 	"testing"
+
+	"golang.org/x/net/context"
 )
 
 func testSignal(method string, t *testing.T) {
@@ -28,7 +30,7 @@ func testSignal(method string, t *testing.T) {
 
 	e.Queues["testqueue"] = testqueue
 
-	e.Handle("/test_signal_sent", method, func(c *Ctx) {
+	e.Handle("/test_signal_sent", method, func(c context.Context) {
 		sent = true
 		for i := 0; i < 10; i++ {
 			e.Send("testqueue", "SENT")

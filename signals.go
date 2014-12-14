@@ -30,7 +30,7 @@ func SignalQueue(e *Engine) {
 	}()
 }
 
-// Message goes directly to a logger, if enbaled.
+// Message goes directly to a logger, if enabled.
 func (e *Engine) Message(message string) {
 	if e.LoggingOn {
 		e.Logger.Printf(" %s", message)
@@ -44,7 +44,7 @@ func (e *Engine) PanicMessage(message string) {
 	//e.Signals <- []byte(message)
 }
 
-// Emit goes as []byte directly to engine.Signals
+// Emit takes a string that goes as []byte directly to engine.Signals
 func (e *Engine) Emit(message string) {
 	e.Signals <- []byte(message)
 }

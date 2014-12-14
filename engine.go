@@ -5,15 +5,20 @@ import (
 	"log"
 	"net/http"
 	"sync"
+
+	"golang.org/x/net/context"
+)
+
+var (
+	CurrentContext context.Context
 )
 
 type (
 	// Manage is a function that can be registered to a route to handle HTTP
-	// requests. Like http.HandlerFunc, but takes a *Ctx
-	Manage func(*Ctx)
+	// requests. Like http.HandlerFunc, but takes a context.Context
+	Manage func(context.Context)
 
-	// Engine is the the core struct containing Groups, sync.Pool cache, and
-	// signaling, in addition to configuration options.
+	// Engine is the the core struct with groups, routing, signaling and more.
 	Engine struct {
 		trees map[string]*node
 		groups
@@ -38,8 +43,9 @@ func New(opts ...Conf) (engine *Engine, err error) {
 	engine.conf = defaultconf()
 	engine.groups = make(groups)
 	engine.Group = NewGroup("/", engine)
-	engine.cache.New = engine.newContext
-	engine.Signals = make(Signals, 1000) // unsolved as to why this needs to be this high; anything lower results in lost messages during testing is the size in bytes?
+	engine.cache.New = engine.newCtx
+	// unsolved as to why this needs to be this high; anything lower results in lost messages during testing is the size in bytes
+	engine.Signals = make(Signals, 1000)
 	engine.Queues = engine.defaultqueues()
 	err = engine.SetConf(opts...)
 	if err != nil {
@@ -80,8 +86,9 @@ func (e *Engine) Manage(method string, path string, m Manage) {
 // Handler allows the usage of a http.Handler as request manage.
 func (e *Engine) Handler(method, path string, handler http.Handler) {
 	e.Manage(method, path,
-		func(c *Ctx) {
-			handler.ServeHTTP(c.RW, c.Request)
+		func(c context.Context) {
+			curr := currentCtx(c)
+			handler.ServeHTTP(curr.RW, curr.request)
 		},
 	)
 }
@@ -89,8 +96,9 @@ func (e *Engine) Handler(method, path string, handler http.Handler) {
 // HandlerFunc allows the use of a http.HandlerFunc as request manage.
 func (e *Engine) HandlerFunc(method, path string, handler http.HandlerFunc) {
 	e.Manage(method, path,
-		func(c *Ctx) {
-			handler(c.RW, c.Request)
+		func(c context.Context) {
+			curr := currentCtx(c)
+			handler(curr.RW, curr.request)
 		},
 	)
 }
@@ -123,10 +131,15 @@ func (e *Engine) ServeFiles(path string, root http.FileSystem) {
 
 	fileServer := http.FileServer(root)
 
-	e.Manage("GET", path, func(c *Ctx) {
-		c.Request.URL.Path = c.Params.ByName("filepath")
-		fileServer.ServeHTTP(c.RW, c.Request)
+	e.Manage("GET", path, func(c context.Context) {
+		curr := currentCtx(c)
+		curr.request.URL.Path = curr.Params.ByName("filepath")
+		fileServer.ServeHTTP(curr.RW, curr.request)
 	})
+}
+
+func currentCtx(c context.Context) *Ctx {
+	return c.Value("Current").(*Ctx)
 }
 
 // internal "recover"
@@ -144,12 +157,13 @@ func (e *Engine) ntfnd(c *Ctx) {
 }
 
 // internal "servehttp"
-func (engine *Engine) srvhttp(w http.ResponseWriter, req *http.Request, c *Ctx) {
-	defer engine.rcvr(c)
+func (engine *Engine) srvhttp(w http.ResponseWriter, req *http.Request, c context.Context) {
+	curr := currentCtx(c)
+	defer engine.rcvr(curr)
 	if root := engine.trees[req.Method]; root != nil {
 		path := req.URL.Path
 		if manage, ps, tsr := root.getValue(path); manage != nil {
-			c.Params = ps
+			curr.Params = ps
 			manage(c)
 			return
 		} else if req.Method != "CONNECT" && path != "/" {
@@ -185,15 +199,17 @@ func (engine *Engine) srvhttp(w http.ResponseWriter, req *http.Request, c *Ctx) 
 		}
 	}
 
-	engine.ntfnd(c)
+	engine.ntfnd(curr)
 	return
 }
 
 // ServeHTTP makes the engine implement the http.Handler interface.
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	c := engine.getContext(w, req)
-	engine.srvhttp(w, req, c)
-	engine.putContext(c)
+	ctx := engine.getCtx(w, req)
+	CurrentContext, cancel := context.WithCancel(context.WithValue(context.Background(), "Current", ctx))
+	engine.srvhttp(w, req, CurrentContext)
+	engine.putCtx(currentCtx(CurrentContext))
+	cancel()
 }
 
 func (engine *Engine) Run(addr string) {

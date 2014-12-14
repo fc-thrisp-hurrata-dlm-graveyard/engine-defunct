@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+
+	"golang.org/x/net/context"
 )
 
 const (
@@ -72,19 +74,20 @@ func (h *HttpStatus) name() string {
 }
 
 func (h *HttpStatus) before() Manage {
-	return func(c *Ctx) {
-		c.RW.WriteHeader(h.Code)
+	return func(c context.Context) {
+		currentCtx(c).RW.WriteHeader(h.Code)
 	}
 }
 
 func (h *HttpStatus) after() Manage {
-	return func(c *Ctx) {
-		if !c.RW.Written() {
-			if c.engine.HTMLStatus {
-				c.RW.Header().Set("Content-Type", "text/html")
-				c.RW.Write(h.format())
+	return func(c context.Context) {
+		curr := currentCtx(c)
+		if !curr.RW.Written() {
+			if curr.engine.HTMLStatus {
+				curr.RW.Header().Set("Content-Type", "text/html")
+				curr.RW.Write(h.format())
 			} else {
-				c.RW.WriteHeaderNow()
+				curr.RW.WriteHeaderNow()
 			}
 		}
 	}
@@ -126,15 +129,16 @@ func defaultHttpStatuses() HttpStatuses {
 }
 
 // PanicHandle is the default Manage for 500 & internal panics. Retrieves all
-// ErrorTypePanic from *Ctx.Errors, sends signal, logs to stdout or logger, and
+// ErrorTypePanic from context.Context.Errors, sends signal, logs to stdout or logger, and
 // serves a basic html page if engine.ServePanic is true.
-func PanicHandle(c *Ctx) {
-	panics := c.Errors.ByType(ErrorTypePanic)
+func PanicHandle(c context.Context) {
+	curr := currentCtx(c)
+	panics := curr.Errors.ByType(ErrorTypePanic)
 	var auffer bytes.Buffer
 	for _, p := range panics {
 		sig := fmt.Sprintf("encountered an internal error: %s\n-----\n%s\n-----\n", p.Err, p.Meta)
-		c.engine.Send("panic", sig)
-		if c.engine.ServePanic {
+		curr.engine.Send("panic", sig)
+		if curr.engine.ServePanic {
 			reader := bufio.NewReader(bytes.NewReader([]byte(fmt.Sprintf("%s", p.Meta))))
 			var err error
 			lineno := 0
@@ -155,10 +159,10 @@ func PanicHandle(c *Ctx) {
 			auffer.WriteString(pb)
 		}
 	}
-	if c.engine.ServePanic {
+	if curr.engine.ServePanic {
 		servePanic := fmt.Sprintf(panicHtml, auffer.String())
-		c.RW.Header().Set("Content-Type", "text/html")
-		c.RW.Write([]byte(servePanic))
+		curr.RW.Header().Set("Content-Type", "text/html")
+		curr.RW.Write([]byte(servePanic))
 	}
 }
 

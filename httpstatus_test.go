@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"golang.org/x/net/context"
 )
 
 func testCallException(code int, t *testing.T) {
 	e, _ := New()
-	e.Handle("/test", "GET", func(c *Ctx) { c.Status(code) })
+	e.Handle("/test", "GET", func(c context.Context) { currentCtx(c).Status(code) })
 
 	w := PerformRequest(e, "GET", "/test")
 
@@ -26,9 +28,9 @@ func TestCallException(t *testing.T) {
 func testCustomException(code int, t *testing.T) {
 	expected := fmt.Sprintf("CUSTOM %d", code)
 	e, _ := New()
-	e.HttpStatuses[code].Update(func(c *Ctx) { c.RW.Write([]byte(expected)) })
+	e.HttpStatuses[code].Update(func(c context.Context) { currentCtx(c).RW.Write([]byte(expected)) })
 
-	e.Handle("/test", "GET", func(c *Ctx) { c.Status(code) })
+	e.Handle("/test", "GET", func(c context.Context) { currentCtx(c).Status(code) })
 
 	w := PerformRequest(e, "GET", "/test")
 

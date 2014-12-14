@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"golang.org/x/net/context"
 )
 
 func printChildren(n *node, prefix string) {
@@ -21,7 +23,7 @@ func printChildren(n *node, prefix string) {
 var fakeHandlerValue string
 
 func fakeHandler(val string) Manage {
-	return func(c *Ctx) {
+	return func(c context.Context) {
 		fakeHandlerValue = val
 	}
 }

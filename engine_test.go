@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"golang.org/x/net/context"
 )
 
 func PerformRequest(h http.Handler, method string, path string) *httptest.ResponseRecorder {
@@ -29,7 +31,7 @@ func testRouteOK(method string, t *testing.T) {
 	passed := false
 	e, _ := Basic()
 
-	e.Handle("/test", method, func(c *Ctx) { passed = true })
+	e.Handle("/test", method, func(c context.Context) { passed = true })
 
 	w := PerformRequest(e, method, "/test")
 
@@ -42,7 +44,6 @@ func testRouteOK(method string, t *testing.T) {
 }
 
 func TestRouteOK(t *testing.T) {
-	//t.Parallel()
 	testRouteOK("POST", t)
 	testRouteOK("DELETE", t)
 	testRouteOK("PATCH", t)
@@ -55,7 +56,7 @@ func testGroupOK(method string, t *testing.T) {
 	passed := false
 	e, _ := Basic()
 
-	e.Handle("/test_group", method, func(c *Ctx) { passed = true })
+	e.Handle("/test_group", method, func(c context.Context) { passed = true })
 
 	w := PerformRequest(e, method, "/test_group")
 
@@ -68,7 +69,6 @@ func testGroupOK(method string, t *testing.T) {
 }
 
 func TestGroupOK(t *testing.T) {
-	//t.Parallel()
 	testGroupOK("POST", t)
 	testGroupOK("DELETE", t)
 	testGroupOK("PATCH", t)
@@ -81,7 +81,7 @@ func testSubGroupOK(method string, t *testing.T) {
 	passed := false
 	e, _ := Basic()
 	g := e.New("/test_group")
-	g.Handle("/test_group_subgroup", method, func(c *Ctx) { passed = true })
+	g.Handle("/test_group_subgroup", method, func(c context.Context) { passed = true })
 
 	w := PerformRequest(e, method, "/test_group/test_group_subgroup")
 
@@ -94,7 +94,6 @@ func testSubGroupOK(method string, t *testing.T) {
 }
 
 func TestSubGroupOK(t *testing.T) {
-	//t.Parallel()
 	testSubGroupOK("POST", t)
 	testSubGroupOK("DELETE", t)
 	testSubGroupOK("PATCH", t)
@@ -107,7 +106,7 @@ func testRouteNotOK(method string, t *testing.T) {
 	passed := false
 	e, _ := Basic()
 	othermethod := methodNotMethod(method)
-	e.Handle("/test_not_ok", othermethod, func(c *Ctx) { passed = true })
+	e.Handle("/test_not_ok", othermethod, func(c context.Context) { passed = true })
 	w := PerformRequest(e, method, "/test_not_ok")
 
 	if passed == true {
@@ -119,7 +118,6 @@ func testRouteNotOK(method string, t *testing.T) {
 }
 
 func TestRouteNotOK(t *testing.T) {
-	//t.Parallel()
 	testRouteNotOK("POST", t)
 	testRouteNotOK("DELETE", t)
 	testRouteNotOK("PATCH", t)
@@ -150,11 +148,12 @@ func TestRouter(t *testing.T) {
 
 	routed := false
 
-	engine.Manage("GET", "/user/:name", func(c *Ctx) {
+	engine.Manage("GET", "/user/:name", func(c context.Context) {
 		routed = true
 		want := Params{Param{"name", "gopher"}}
-		if !reflect.DeepEqual(c.Params, want) {
-			t.Fatalf("wrong wildcard values: want %v, got %v", want, c.Params)
+		curr := currentCtx(c)
+		if !reflect.DeepEqual(curr.Params, want) {
+			t.Fatalf("wrong wildcard values: want %v, got %v", want, curr.Params)
 		}
 	})
 
@@ -182,19 +181,19 @@ func TestRouterAPI(t *testing.T) {
 	httpHandler := handlerStruct{&handler}
 
 	router, _ := Basic()
-	router.Manage("GET", "/GET", func(c *Ctx) {
+	router.Manage("GET", "/GET", func(c context.Context) {
 		get = true
 	})
-	router.Manage("POST", "/POST", func(c *Ctx) {
+	router.Manage("POST", "/POST", func(c context.Context) {
 		post = true
 	})
-	router.Manage("PUT", "/PUT", func(c *Ctx) {
+	router.Manage("PUT", "/PUT", func(c context.Context) {
 		put = true
 	})
-	router.Manage("PATCH", "/PATCH", func(c *Ctx) {
+	router.Manage("PATCH", "/PATCH", func(c context.Context) {
 		patch = true
 	})
-	router.Manage("DELETE", "/DELETE", func(c *Ctx) {
+	router.Manage("DELETE", "/DELETE", func(c context.Context) {
 		delete = true
 	})
 	router.Handler("GET", "/Handler", httpHandler)
@@ -259,7 +258,7 @@ func TestRouterRoot(t *testing.T) {
 
 func TestRouterLookup(t *testing.T) {
 	routed := false
-	wantHandle := func(_ *Ctx) {
+	wantHandle := func(_ context.Context) {
 		routed = true
 	}
 	wantParams := Params{Param{"name", "gopher"}}
