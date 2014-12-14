@@ -32,6 +32,10 @@ func defaultconf() *conf {
 	}
 }
 
+func (e *Engine) Reconfigure(reconfigure func() error) error {
+	return reconfigure()
+}
+
 func (e *Engine) SetConf(opts ...Conf) error {
 	for _, opt := range opts {
 		if err := opt(e); err != nil {
