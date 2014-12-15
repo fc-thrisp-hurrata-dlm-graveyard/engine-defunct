@@ -2,7 +2,6 @@ package engine
 
 import (
 	"errors"
-	"fmt"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -34,7 +33,6 @@ func testRouteOK(method string, t *testing.T) {
 
 	e.Take("/test", method, func(c context.Context) {
 		passed = true
-		fmt.Printf("%+v\n", c)
 	})
 
 	w := PerformRequest(e, method, "/test")
