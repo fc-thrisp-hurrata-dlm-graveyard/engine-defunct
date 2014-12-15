@@ -8,7 +8,7 @@ Engine is a core package to drive a web applications in Go. Routing, context, st
 
 ### Install
 
-    go get github.com/thrisp/engine
+    go get -u github.com/thrisp/engine
 
 [*Quick Start*](/engine/quick)
 
@@ -20,4 +20,8 @@ Engine is a core package to drive a web applications in Go. Routing, context, st
 - [GoDoc](https://godoc.org/github.com/thrisp/engine)
 
 
+### Configuration
 
+A created engine can be configured through several functions.
+
+[*learn more*](/engine/configuration)

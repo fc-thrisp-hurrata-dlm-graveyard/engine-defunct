@@ -5,7 +5,7 @@ title = "configuration"
 
 engine.New takes any number of configuration functions with the signature:
 
-    func(\*Engine) error
+    func(*Engine) error
 
 These functions take the created engine to apply any configuration options, and returning any errors.
 
