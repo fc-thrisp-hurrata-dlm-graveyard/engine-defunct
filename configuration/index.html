@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title> configuration </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <link rel="stylesheet" href="/engine/css/poole.css">
+    <link rel="stylesheet" href="/engine/css/syntax.css">
+    <link rel="stylesheet" href="/engine/css/engine.css">
+    <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'>
+    
+    
+</head>
+
+<html>
+    <body>
+        <div class="sidebar">
+    <div class="container">
+        <div class="sidebar-about">
+            <h1>Engine</h1>
+            <img src="/engine/img/engine-logo-1.png"></img>
+        </div>
+        <div class="sidebar-sticky">
+            <ul class="sidebar-nav">
+                <li><a href="/engine">The Engine Website</a></li>
+                <li><a href="http://github.com/thrisp/engine">Engine @ github</a></li>
+                <li><a href="http://github.com/thrisp/engine/issues">Issue Tracker</a></li>
+            </ul>
+            <h6><p>© Copyright 2014 <a href="http://github.com/thrisp">thrisp/hurrata</a></p></h6>
+        </div>  
+    </div>
+</div>
+
+        <div class="content container">
+            <div class=page>
+                
+
+<h3 id="toc_0">Configuration</h3>
+
+<p>engine.New takes any number of configuration functions with the signature:</p>
+
+<pre><code>func(*Engine) error
+</code></pre>
+
+<p>These functions take the created engine to apply any configuration options, and returning any errors.</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">Function</th>
+<th align="center">Explanation</th>
+<th align="center">Default</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center">ServePanic(bool)</td>
+<td align="center">Serves a html page on panic</td>
+<td align="center">true</td>
+</tr>
+
+<tr>
+<td align="center">RedirectTrailingSlash(bool)</td>
+<td align="center">Enables automatic redirection if the current route can&rsquo;t be matched but a handler for the path with (without) the trailing slash exists</td>
+<td align="center">true</td>
+</tr>
+
+<tr>
+<td align="center">RedirectFixedPath(bool)</td>
+<td align="center">If enabled, the router tries to fix the current request path, if no handle is registered for it</td>
+<td align="center">true</td>
+</tr>
+
+<tr>
+<td align="center">HTMLStatus(bool)</td>
+<td align="center">All statuses send a simple html page</td>
+<td align="center">false</td>
+</tr>
+
+<tr>
+<td align="center">LoggingOn(bool)</td>
+<td align="center">All signals are sent to stdout through the logger or a default logger</td>
+<td align="center">false</td>
+</tr>
+
+<tr>
+<td align="center">Logger(*log.Logger)</td>
+<td align="center">Sets logging on to true using the provided logger</td>
+<td align="center">nil</td>
+</tr>
+
+<tr>
+<td align="center">MaxFormMemory(int64)</td>
+<td align="center">maximum size for file uploads, in bytes</td>
+<td align="center">1000000</td>
+</tr>
+</tbody>
+</table>
+
+            </div>
+        </div>
+    </body>
+</html>

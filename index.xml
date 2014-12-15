@@ -1,0 +1,1092 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Recent Content on  </title>
+      <generator uri="https://hugo.spf13.com">Hugo</generator>
+    <link>http://thrisp.github.io/engine/index.xml/</link>
+    
+    
+    
+    <updated>Mon, 01 Jan 0001 00:00:00 UTC</updated>
+    
+    <item>
+      <title>configuration</title>
+      <link>http://thrisp.github.io/engine/configuration/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
+      
+      <guid>http://thrisp.github.io/engine/configuration/</guid>
+      <description>
+
+&lt;h3 id=&#34;toc_0&#34;&gt;Configuration&lt;/h3&gt;
+
+&lt;p&gt;engine.New takes any number of configuration functions with the signature:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;func(*Engine) error
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;These functions take the created engine to apply any configuration options, and returning any errors.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;center&#34;&gt;Function&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;Explanation&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;Default&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;ServePanic(bool)&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;Serves a html page on panic&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;true&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;RedirectTrailingSlash(bool)&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;Enables automatic redirection if the current route can&amp;rsquo;t be matched but a handler for the path with (without) the trailing slash exists&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;true&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;RedirectFixedPath(bool)&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;If enabled, the router tries to fix the current request path, if no handle is registered for it&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;true&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;HTMLStatus(bool)&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;All statuses send a simple html page&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;false&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;LoggingOn(bool)&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;All signals are sent to stdout through the logger or a default logger&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;false&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;Logger(*log.Logger)&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;Sets logging on to true using the provided logger&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;nil&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;MaxFormMemory(int64)&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;maximum size for file uploads, in bytes&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;1000000&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Install &amp; Quick Start</title>
+      <link>http://thrisp.github.io/engine/quick/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
+      
+      <guid>http://thrisp.github.io/engine/quick/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Install &amp;amp; QuickStart&lt;/h1&gt;
+
+&lt;h3 id=&#34;toc_1&#34;&gt;Install&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;go get github.com/thrisp/engine
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_2&#34;&gt;Quickstart&lt;/h3&gt;
+
+&lt;p&gt;main.go&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;package main
+
+import (
+    &amp;quot;os&amp;quot;
+    &amp;quot;os/signal&amp;quot;
+    &amp;quot;github.com/thrisp/engine&amp;quot;
+)
+
+func Display(c *engine.Ctx) {
+    c.RW.Header().Set(&amp;quot;Content-Type&amp;quot;, &amp;quot;text/html&amp;quot;)
+    c.RW.Write(&amp;quot;HELLO WORLD!&amp;quot;)
+}
+
+var quit = make(chan bool)
+
+func init() {
+    c := make(chan os.Signal, 1)
+    signal.Notify(c, os.Interrupt)
+    go func() {
+        for _ = range c {
+            quit &amp;lt;- true
+        }
+    }()
+}
+
+func main() {
+    e := engine.Basic()
+    e.Manage(&amp;quot;GET&amp;quot;, &amp;quot;/hello/world/&amp;quot;, Display)
+    go e.Run(&amp;quot;:8080&amp;quot;)
+    &amp;lt;-quit
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;go run main.go&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>engine-index</title>
+      <link>http://thrisp.github.io/engine/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
+      
+      <guid>http://thrisp.github.io/engine/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Welcome&lt;/h1&gt;
+
+&lt;p&gt;Engine is a core package to drive a web applications in Go. Routing, context, statuses and more close the distance between the Go standard library and your own web framework.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_1&#34;&gt;Install&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;go get -u github.com/thrisp/engine
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;a href=&#34;/engine/quick&#34;&gt;&lt;em&gt;Quick Start&lt;/em&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_2&#34;&gt;Documentation&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;/engine/documentation/0.2.0/&#34;&gt;Current (0.2.0)&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://godoc.org/github.com/thrisp/engine&#34;&gt;GoDoc&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;toc_3&#34;&gt;Configuration&lt;/h3&gt;
+
+&lt;p&gt;A created engine can be configured through several functions.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;/engine/configuration&#34;&gt;&lt;em&gt;learn more&lt;/em&gt;&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Documentation 0.0.2</title>
+      <link>http://thrisp.github.io/engine/documentation/0.0.2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
+      
+      <guid>http://thrisp.github.io/engine/documentation/0.0.2/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;engine&lt;/h1&gt;
+
+&lt;pre&gt;&lt;code&gt;import &amp;quot;github.com/thrisp/engine&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Constants&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;const (
+    ErrorTypeInternal = 1 &amp;lt;&amp;lt; iota
+    ErrorTypeExternal = 1 &amp;lt;&amp;lt; iota
+    ErrorTypePanic    = 1 &amp;lt;&amp;lt; iota
+    ErrorTypeAll      = 0xffffffff
+    NotWritten = -1
+)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;func CleanPath&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func CleanPath(p string) string
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;CleanPath is the URL version of path.Clean, it returns a canonical URL path
+for p, eliminating . and .. elements.&lt;/p&gt;
+
+&lt;p&gt;The following rules are applied iteratively until no further processing can
+be done:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;1. Replace multiple slashes with a single slash.
+2. Eliminate each . path name element (the current directory).
+3. Eliminate each inner .. path name element (the parent directory)
+   along with the non-.. element that precedes it.
+4. Eliminate .. elements that begin a rooted path:
+   that is, replace &amp;quot;/..&amp;quot; by &amp;quot;/&amp;quot; at the beginning of a path.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If the result of this process is an empty string, &amp;ldquo;/&amp;rdquo; is returned&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;func PanicHandle&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func PanicHandle(c *Ctx)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;PanicHandle is the default Manage for 500 &amp;amp; internal panics. Retrieves all
+ErrorTypePanic from *Ctx.Errors, sends signal, logs to stdout or logger, and
+serves a basic html page if engine.ServePanic is true.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;type Ctx&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Ctx struct {
+    RW      ResponseWriter
+    Request *http.Request
+    Params  Params
+    Form    url.Values
+    // Files tbd
+    Errors errorMsgs
+    // contains filtered or unexported fields
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Ctx is the core request-response context passed between any Manage
+handlers, useful for storing &amp;amp; persisting data within a request &amp;amp; response.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_5&#34;&gt;func (*Ctx) Abort&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Abort(code int)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Immediately abort the context, writing out the code to the response&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_6&#34;&gt;func (*Ctx) Error&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Error(err error, meta interface{})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Attaches an error to a list of errors. Call Error for each error that occurred
+during the resolution of a request.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_7&#34;&gt;func (*Ctx) Fail&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Fail(code int, err error)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Fail is the same as Abort plus an error message.
+Calling &lt;code&gt;c.Fail(500, err)&lt;/code&gt; is equivalent to:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;c.Error(err, &amp;quot;Failed.&amp;quot;)
+c.Abort(500)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_8&#34;&gt;func (*Ctx) LastError&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) LastError() error
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Returns the last error for the Ctx.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_9&#34;&gt;func (*Ctx) Status&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Status(code int)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Calls an HttpStatus in the current group by integer code from the Context,
+if the status exists.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_10&#34;&gt;type Engine&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Engine struct {
+    *Group
+    // contains filtered or unexported fields
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Engine is the the core struct containing Groups, sync.Pool cache, and
+signaling, in addition to configuration options.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_11&#34;&gt;func Basic&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func Basic() *Engine
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Basic produces a new engine with LoggingOn set to true and visible logging.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_12&#34;&gt;func Empty&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func Empty() *Engine
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Empty returns an empty Engine with zero configuration.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_13&#34;&gt;func New&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func New() *Engine
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;New produces a new engine, with default configuration, a base group, method
+for retrieving a new Ctx, and signalling.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_14&#34;&gt;func (*Engine) Handler&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) Handler(method, path string, handler http.Handler)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Handler allows the usage of a http.Handler as request manage.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_15&#34;&gt;func (*Engine) HandlerFunc&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) HandlerFunc(method, path string, handler http.HandlerFunc)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;HandlerFunc allows the use of a http.HandlerFunc as request manage.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_16&#34;&gt;func (*Engine) LogSignal&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) LogSignal()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_17&#34;&gt;func (*Engine) Lookup&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) Lookup(method, path string) (Manage, Params, bool)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lookup allows the manual lookup of a method + path combo.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_18&#34;&gt;func (*Engine) Manage&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) Manage(method string, path string, m Manage)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Registers a new request Manage function with the given path and method.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_19&#34;&gt;func (*Engine) NewSignaller&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) NewSignaller() signal
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_20&#34;&gt;func (*Engine) Run&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (engine *Engine) Run(addr string)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_21&#34;&gt;func (*Engine) SendSignal&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) SendSignal(msg string)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_22&#34;&gt;func (*Engine) ServeFiles&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) ServeFiles(path string, root http.FileSystem)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;ServeFiles serves files from the given file system root. The path must end
+with &amp;ldquo;/*filepath&amp;rdquo;, files are then served from the local path
+/defined/root/dir/*filepath.&lt;/p&gt;
+
+&lt;p&gt;e.g., if root is &amp;ldquo;/etc&amp;rdquo; and *filepath is &amp;ldquo;passwd&amp;rdquo;, the local file
+&amp;ldquo;/etc/passwd&amp;rdquo; would be served.&lt;/p&gt;
+
+&lt;p&gt;Internally a http.FileServer is used, therefore http.NotFound is used instead
+of the Router&amp;rsquo;s NotFound handler.&lt;/p&gt;
+
+&lt;p&gt;To use the operating system&amp;rsquo;s file system implementation,
+use http.Dir:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;router.ServeFiles(&amp;quot;/src/*filepath&amp;quot;, http.Dir(&amp;quot;/var/www&amp;quot;))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_23&#34;&gt;func (*Engine) ServeHTTP&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;ServeHTTP makes the engine implement the http.Handler interface.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_24&#34;&gt;type EngineError&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type EngineError struct {
+    // contains filtered or unexported fields
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_25&#34;&gt;func (*EngineError) Error&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *EngineError) Error() string
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_26&#34;&gt;type Group&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Group struct {
+    HttpStatuses
+    // contains filtered or unexported fields
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_27&#34;&gt;func NewGroup&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func NewGroup(prefix string, engine *Engine) *Group
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;NewGroup creates a group with no parent and the provided prefix, usually as
+a primary engine Group&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_28&#34;&gt;func (*Group) Handle&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (group *Group) Handle(route string, method string, handler Manage)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Handle provides a route, method, and Manage to the router, and creates
+a function using the handler when the router matches the route and method.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_29&#34;&gt;func (*Group) New&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (group *Group) New(component string) *Group
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;New creates a group from an existing group using the component string as a
+prefix for all subsequent route attachments to the group. The existing group
+will be the parent of the new group, and both will share the same engine&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_30&#34;&gt;type HttpStatus&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type HttpStatus struct {
+    Code     int
+    Message  string
+    Handlers []Manage
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Status code, message, and Manage handlers for a http status.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_31&#34;&gt;func NewHttpStatus&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func NewHttpStatus(code int, message string) *HttpStatus
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Create new HttpStatus with the code, message, and default Manage handlers.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_32&#34;&gt;func (*HttpStatus) Update&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (h *HttpStatus) Update(handlers ...Manage)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Adds any number of custom Manage to the HttpStatus, between the
+default status before &amp;amp; after manage.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_33&#34;&gt;type HttpStatuses&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type HttpStatuses map[int]*HttpStatus
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A map of HttpStatus instances, keyed by status code&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_34&#34;&gt;func (HttpStatuses) New&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (hs HttpStatuses) New(h *HttpStatus)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;New adds a new HttpStatus to HttpStatuses keyed by status code.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_35&#34;&gt;type Manage&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Manage func(*Ctx)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Manage is a function that can be registered to a route to handle HTTP
+requests. Like http.HandlerFunc, but takes a *Ctx&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_36&#34;&gt;type Param&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Param struct {
+    Key   string
+    Value string
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Param is a single URL parameter, consisting of a key and a value.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_37&#34;&gt;type Params&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Params []Param
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Params is a Param-slice, as returned by the router. The slice is ordered,
+the first URL parameter is also the first slice value. It is safe to read
+values by the index.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_38&#34;&gt;func (Params) ByName&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (ps Params) ByName(name string) string
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;ByName returns the value of the first Param which key matches the given name.
+If no matching Param is found, an empty string is returned.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_39&#34;&gt;type ResponseWriter&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type ResponseWriter interface {
+    http.ResponseWriter
+    http.Hijacker
+    http.Flusher
+    http.CloseNotifier
+
+    Status() int
+    Size() int
+    Written() bool
+    WriteHeaderNow()
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://thrisp.github.io/engine/documentation/0.2.0/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
+      
+      <guid>http://thrisp.github.io/engine/documentation/0.2.0/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;engine&lt;/h1&gt;
+
+&lt;pre&gt;&lt;code&gt;import &amp;quot;github.com/thrisp/engine&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Constants&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;const (
+    ErrorTypeInternal = 1 &amp;lt;&amp;lt; iota
+    ErrorTypeExternal = 1 &amp;lt;&amp;lt; iota
+    ErrorTypePanic    = 1 &amp;lt;&amp;lt; iota
+    ErrorTypeAll      = 0xffffffff
+)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;const (
+    NotWritten = -1
+)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Variables&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;var (
+    CurrentContext context.Context
+)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;var (
+    EnginePanic = []byte(&amp;quot;engine-panic&amp;quot;)
+)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;func CleanPath&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func CleanPath(p string) string
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;CleanPath is the URL version of path.Clean, it returns a canonical URL path
+for p, eliminating . and .. elements.&lt;/p&gt;
+
+&lt;p&gt;The following rules are applied iteratively until no further processing can
+be done:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;1. Replace multiple slashes with a single slash.
+2. Eliminate each . path name element (the current directory).
+3. Eliminate each inner .. path name element (the parent directory)
+   along with the non-.. element that precedes it.
+4. Eliminate .. elements that begin a rooted path:
+   that is, replace &amp;quot;/..&amp;quot; by &amp;quot;/&amp;quot; at the beginning of a path.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If the result of this process is an empty string, &amp;ldquo;/&amp;rdquo; is returned&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;func MethodColor&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func MethodColor(method string) (color string)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_5&#34;&gt;func PanicHandle&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func PanicHandle(c context.Context)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;PanicHandle is the default Manage for 500 &amp;amp; internal panics. Retrieves all
+ErrorTypePanic from context.Context.Errors, sends signal, logs to stdout or logger, and
+serves a basic html page if engine.ServePanic is true.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_6&#34;&gt;func SignalQueue&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func SignalQueue(e *Engine)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A simple Signal queue outputting everything emitted to engine.Signals.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_7&#34;&gt;func StatusColor&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func StatusColor(code int) (color string)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_8&#34;&gt;type Conf&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Conf func(*Engine) error
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A configuration function that takes an engine pointer, configures the
+engine within the function, and returns an error.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_9&#34;&gt;func HTMLStatus&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func HTMLStatus(b bool) Conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_10&#34;&gt;func Logger&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func Logger(l *log.Logger) Conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Logger specifies a log.Logger, and sets LoggingOn to true, and capturing
+signals with Head labeled &amp;ldquo;do-log&amp;rdquo;&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_11&#34;&gt;func LoggingOn&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func LoggingOn(b bool) Conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;LogginOn sets Logger to a default log.Logger and sets LoggingOn to true.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_12&#34;&gt;func MaxFormMemory&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func MaxFormMemory(byts int64) Conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_13&#34;&gt;func RedirectFixedPath&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func RedirectFixedPath(b bool) Conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_14&#34;&gt;func RedirectTrailingSlash&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func RedirectTrailingSlash(b bool) Conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_15&#34;&gt;func ServePanic&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func ServePanic(b bool) Conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_16&#34;&gt;type Ctx&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Ctx struct {
+    RW ResponseWriter
+
+    Params Params
+
+    Errors errorMsgs
+    // contains filtered or unexported fields
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Ctx is the core request-response context passed between any Manage
+handlers, useful for storing &amp;amp; persisting data within a request &amp;amp; response.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_17&#34;&gt;func (*Ctx) Abort&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Abort(code int)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Immediately abort the context, writing out the code to the response&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_18&#34;&gt;func (*Ctx) Data&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Data() map[string]interface{}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_19&#34;&gt;func (*Ctx) Error&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Error(err error, meta interface{})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Attaches an error to a list of errors. Call Error for each error that occurred
+during the resolution of a request.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_20&#34;&gt;func (*Ctx) Fail&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Fail(code int, err error)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Fail is the same as Abort plus an error message.
+Calling &lt;code&gt;c.Fail(500, err)&lt;/code&gt; is equivalent to:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;c.Error(err, &amp;quot;Failed.&amp;quot;)
+c.Abort(500)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_21&#34;&gt;func (*Ctx) Files&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Files() map[string][]*multipart.FileHeader
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_22&#34;&gt;func (Ctx) Fmt&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (r Ctx) Fmt() string
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_23&#34;&gt;func (*Ctx) Form&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Form() url.Values
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_24&#34;&gt;func (*Ctx) LastError&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) LastError() error
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Returns the last error for the Ctx.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_25&#34;&gt;func (Ctx) Latency&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (r Ctx) Latency() time.Duration
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_26&#34;&gt;func (Ctx) LogFmt&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (r Ctx) LogFmt() string
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_27&#34;&gt;func (Ctx) PostProcess&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (r Ctx) PostProcess(req *http.Request, rw ResponseWriter)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_28&#34;&gt;func (*Ctx) Request&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Request() *http.Request
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_29&#34;&gt;func (Ctx) Requester&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (r Ctx) Requester(req *http.Request)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_30&#34;&gt;func (Ctx) Start&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (r Ctx) Start()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_31&#34;&gt;func (*Ctx) Status&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Status(code int)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Calls an HttpStatus in the current group by integer code from the Context,
+if the status exists.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_32&#34;&gt;func (*Ctx) StatusFunc&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) StatusFunc() (func(int), bool)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_33&#34;&gt;func (Ctx) Stop&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (r Ctx) Stop()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_34&#34;&gt;func (*Ctx) Writer&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (c *Ctx) Writer() ResponseWriter
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_35&#34;&gt;type Engine&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Engine struct {
+    *Group
+
+    Logger  *log.Logger
+    Signals Signals
+    Queues  queues
+    // contains filtered or unexported fields
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Engine is the the core struct with groups, routing, signaling and more.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_36&#34;&gt;func Basic&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func Basic(opts ...Conf) (engine *Engine, err error)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Basic produces a new engine with LoggingOn set to true and a default logger.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_37&#34;&gt;func Empty&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func Empty() *Engine
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Empty returns an empty Engine with zero configuration.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_38&#34;&gt;func New&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func New(opts ...Conf) (engine *Engine, err error)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;New produces a new engine, with default configuration, a base group, method
+for retrieving a new Ctx, and signalling.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_39&#34;&gt;func (*Engine) Emit&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) Emit(message string)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Emit takes a string that goes as []byte directly to engine.Signals&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_40&#34;&gt;func (*Engine) Handler&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) Handler(method, path string, handler http.Handler)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Handler allows the usage of a http.Handler as request manage.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_41&#34;&gt;func (*Engine) HandlerFunc&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) HandlerFunc(method, path string, handler http.HandlerFunc)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;HandlerFunc allows the use of a http.HandlerFunc as request manage.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_42&#34;&gt;func (*Engine) Lookup&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) Lookup(method, path string) (Manage, Params, bool)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lookup allows the manual lookup of a method + path combo.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_43&#34;&gt;func (*Engine) Manage&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) Manage(method string, path string, m Manage)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Registers a new request Manage function with the given path and method.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_44&#34;&gt;func (*Engine) Message&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) Message(message string)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Message goes directly to a logger, if enabled.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_45&#34;&gt;func (*Engine) PanicMessage&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) PanicMessage(message string)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;PanicMessage goes to a standard and unavaoidable log, then emits a signal.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_46&#34;&gt;func (*Engine) Reconfigure&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) Reconfigure(reconfigure func() error) error
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_47&#34;&gt;func (*Engine) Run&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (engine *Engine) Run(addr string)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_48&#34;&gt;func (*Engine) Send&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) Send(queue string, message string)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Send sends a message to the specified queue.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_49&#34;&gt;func (*Engine) ServeFiles&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) ServeFiles(path string, root http.FileSystem)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;ServeFiles serves files from the given file system root. The path must end
+with &amp;ldquo;/*filepath&amp;rdquo;, files are then served from the local path
+/defined/root/dir/*filepath.&lt;/p&gt;
+
+&lt;p&gt;e.g., if root is &amp;ldquo;/etc&amp;rdquo; and *filepath is &amp;ldquo;passwd&amp;rdquo;, the local file
+&amp;ldquo;/etc/passwd&amp;rdquo; would be served.&lt;/p&gt;
+
+&lt;p&gt;Internally a http.FileServer is used, therefore http.NotFound is used instead
+of the Router&amp;rsquo;s NotFound handler.&lt;/p&gt;
+
+&lt;p&gt;To use the operating system&amp;rsquo;s file system implementation,
+use http.Dir:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;router.ServeFiles(&amp;quot;/src/*filepath&amp;quot;, http.Dir(&amp;quot;/var/www&amp;quot;))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_50&#34;&gt;func (*Engine) ServeHTTP&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;ServeHTTP makes the engine implement the http.Handler interface.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_51&#34;&gt;func (*Engine) SetConf&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) SetConf(opts ...Conf) error
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_52&#34;&gt;func (*Engine) SetConfBool&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) SetConfBool(fieldname string, as bool) error
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_53&#34;&gt;func (*Engine) SetConfInt64&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *Engine) SetConfInt64(fieldname string, as int64) error
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_54&#34;&gt;type EngineError&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type EngineError struct {
+    // contains filtered or unexported fields
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_55&#34;&gt;func (*EngineError) Error&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (e *EngineError) Error() string
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_56&#34;&gt;type Group&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Group struct {
+    HttpStatuses
+    // contains filtered or unexported fields
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_57&#34;&gt;func NewGroup&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func NewGroup(prefix string, engine *Engine) *Group
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;NewGroup creates a group with no parent and the provided prefix.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_58&#34;&gt;func (*Group) New&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (group *Group) New(component string) *Group
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;New creates a group from an existing group using the the groups prefix and
+the provided component string as a prefix. The existing group will be the
+parent of the new group.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_59&#34;&gt;func (*Group) Take&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (group *Group) Take(route string, method string, handler func(context.Context))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Handle provides a route, method, and Manage to the router, and creates
+a function using the handler when the router matches the route and method.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_60&#34;&gt;func (*Group) TakeStatus&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (group *Group) TakeStatus(code int, statushandler func(context.Context))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_61&#34;&gt;type HttpStatus&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type HttpStatus struct {
+    Code     int
+    Message  string
+    Handlers []Manage
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Status code, message, and Manage handlers for a http status.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_62&#34;&gt;func NewHttpStatus&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func NewHttpStatus(code int, message string) *HttpStatus
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Create new HttpStatus with the code, message, and default Manage handlers.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_63&#34;&gt;func (*HttpStatus) Update&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (h *HttpStatus) Update(handlers ...Manage)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Adds any number of custom Manage to the HttpStatus, between the
+default status before &amp;amp; after manage.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_64&#34;&gt;type HttpStatuses&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type HttpStatuses map[int]*HttpStatus
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A map of HttpStatus instances, keyed by status code&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_65&#34;&gt;func (HttpStatuses) New&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (hs HttpStatuses) New(h *HttpStatus)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;New adds a new HttpStatus to HttpStatuses keyed by status code.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_66&#34;&gt;type Manage&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Manage func(context.Context)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Manage is a function that can be registered to a route to handle HTTP
+requests. Like http.HandlerFunc, but takes a context.Context&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_67&#34;&gt;type Param&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Param struct {
+    Key   string
+    Value string
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Param is a single URL parameter, consisting of a key and a value.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_68&#34;&gt;type Params&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Params []Param
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Params is a Param-slice, as returned by the router. The slice is ordered,
+the first URL parameter is also the first slice value. It is safe to read
+values by the index.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_69&#34;&gt;func (Params) ByName&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func (ps Params) ByName(name string) string
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;ByName returns the value of the first Param which key matches the given name.
+If no matching Param is found, an empty string is returned.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_70&#34;&gt;type ResponseWriter&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type ResponseWriter interface {
+    http.ResponseWriter
+    http.Hijacker
+    http.Flusher
+    http.CloseNotifier
+
+    Status() int
+    Size() int
+    Written() bool
+    WriteHeaderNow()
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_71&#34;&gt;type Signal&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Signal []byte
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Signal denotes a byte signal&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_72&#34;&gt;type Signals&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Signals chan Signal
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Signals is a channel for Signal&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

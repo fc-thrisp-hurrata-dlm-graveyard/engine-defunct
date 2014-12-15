@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title> Engine </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <link rel="stylesheet" href="/engine/css/poole.css">
+    <link rel="stylesheet" href="/engine/css/syntax.css">
+    <link rel="stylesheet" href="/engine/css/engine.css">
+    <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'>
+    
+    
+</head>
+
+<html>
+    <body>
+        <div class="sidebar">
+    <div class="container">
+        <div class="sidebar-about">
+            <h1>Engine</h1>
+            <img src="/engine/img/engine-logo-1.png"></img>
+        </div>
+        <div class="sidebar-sticky">
+            <ul class="sidebar-nav">
+                <li><a href="/engine">The Engine Website</a></li>
+                <li><a href="http://github.com/thrisp/engine">Engine @ github</a></li>
+                <li><a href="http://github.com/thrisp/engine/issues">Issue Tracker</a></li>
+            </ul>
+            <h6><p>© Copyright 2014 <a href="http://github.com/thrisp">thrisp/hurrata</a></p></h6>
+        </div>  
+    </div>
+</div>
+
+        <div class="content container">
+            <div class=page>
+                
+
+<h1 id="toc_0">engine</h1>
+
+<pre><code>import &quot;github.com/thrisp/engine&quot;
+</code></pre>
+
+<h2 id="toc_1">Constants</h2>
+
+<pre><code class="language-go">const (
+    ErrorTypeInternal = 1 &lt;&lt; iota
+    ErrorTypeExternal = 1 &lt;&lt; iota
+    ErrorTypePanic    = 1 &lt;&lt; iota
+    ErrorTypeAll      = 0xffffffff
+)
+</code></pre>
+
+<pre><code class="language-go">const (
+    NotWritten = -1
+)
+</code></pre>
+
+<h2 id="toc_2">Variables</h2>
+
+<pre><code class="language-go">var (
+    CurrentContext context.Context
+)
+</code></pre>
+
+<pre><code class="language-go">var (
+    EnginePanic = []byte(&quot;engine-panic&quot;)
+)
+</code></pre>
+
+<h2 id="toc_3">func CleanPath</h2>
+
+<pre><code class="language-go">func CleanPath(p string) string
+</code></pre>
+
+<p>CleanPath is the URL version of path.Clean, it returns a canonical URL path
+for p, eliminating . and .. elements.</p>
+
+<p>The following rules are applied iteratively until no further processing can
+be done:</p>
+
+<pre><code>1. Replace multiple slashes with a single slash.
+2. Eliminate each . path name element (the current directory).
+3. Eliminate each inner .. path name element (the parent directory)
+   along with the non-.. element that precedes it.
+4. Eliminate .. elements that begin a rooted path:
+   that is, replace &quot;/..&quot; by &quot;/&quot; at the beginning of a path.
+</code></pre>
+
+<p>If the result of this process is an empty string, &ldquo;/&rdquo; is returned</p>
+
+<h2 id="toc_4">func MethodColor</h2>
+
+<pre><code class="language-go">func MethodColor(method string) (color string)
+</code></pre>
+
+<h2 id="toc_5">func PanicHandle</h2>
+
+<pre><code class="language-go">func PanicHandle(c context.Context)
+</code></pre>
+
+<p>PanicHandle is the default Manage for 500 &amp; internal panics. Retrieves all
+ErrorTypePanic from context.Context.Errors, sends signal, logs to stdout or logger, and
+serves a basic html page if engine.ServePanic is true.</p>
+
+<h2 id="toc_6">func SignalQueue</h2>
+
+<pre><code class="language-go">func SignalQueue(e *Engine)
+</code></pre>
+
+<p>A simple Signal queue outputting everything emitted to engine.Signals.</p>
+
+<h2 id="toc_7">func StatusColor</h2>
+
+<pre><code class="language-go">func StatusColor(code int) (color string)
+</code></pre>
+
+<h2 id="toc_8">type Conf</h2>
+
+<pre><code class="language-go">type Conf func(*Engine) error
+</code></pre>
+
+<p>A configuration function that takes an engine pointer, configures the
+engine within the function, and returns an error.</p>
+
+<h3 id="toc_9">func HTMLStatus</h3>
+
+<pre><code class="language-go">func HTMLStatus(b bool) Conf
+</code></pre>
+
+<h3 id="toc_10">func Logger</h3>
+
+<pre><code class="language-go">func Logger(l *log.Logger) Conf
+</code></pre>
+
+<p>Logger specifies a log.Logger, and sets LoggingOn to true, and capturing
+signals with Head labeled &ldquo;do-log&rdquo;</p>
+
+<h3 id="toc_11">func LoggingOn</h3>
+
+<pre><code class="language-go">func LoggingOn(b bool) Conf
+</code></pre>
+
+<p>LogginOn sets Logger to a default log.Logger and sets LoggingOn to true.</p>
+
+<h3 id="toc_12">func MaxFormMemory</h3>
+
+<pre><code class="language-go">func MaxFormMemory(byts int64) Conf
+</code></pre>
+
+<h3 id="toc_13">func RedirectFixedPath</h3>
+
+<pre><code class="language-go">func RedirectFixedPath(b bool) Conf
+</code></pre>
+
+<h3 id="toc_14">func RedirectTrailingSlash</h3>
+
+<pre><code class="language-go">func RedirectTrailingSlash(b bool) Conf
+</code></pre>
+
+<h3 id="toc_15">func ServePanic</h3>
+
+<pre><code class="language-go">func ServePanic(b bool) Conf
+</code></pre>
+
+<h2 id="toc_16">type Ctx</h2>
+
+<pre><code class="language-go">type Ctx struct {
+    RW ResponseWriter
+
+    Params Params
+
+    Errors errorMsgs
+    // contains filtered or unexported fields
+}
+</code></pre>
+
+<p>Ctx is the core request-response context passed between any Manage
+handlers, useful for storing &amp; persisting data within a request &amp; response.</p>
+
+<h3 id="toc_17">func (*Ctx) Abort</h3>
+
+<pre><code class="language-go">func (c *Ctx) Abort(code int)
+</code></pre>
+
+<p>Immediately abort the context, writing out the code to the response</p>
+
+<h3 id="toc_18">func (*Ctx) Data</h3>
+
+<pre><code class="language-go">func (c *Ctx) Data() map[string]interface{}
+</code></pre>
+
+<h3 id="toc_19">func (*Ctx) Error</h3>
+
+<pre><code class="language-go">func (c *Ctx) Error(err error, meta interface{})
+</code></pre>
+
+<p>Attaches an error to a list of errors. Call Error for each error that occurred
+during the resolution of a request.</p>
+
+<h3 id="toc_20">func (*Ctx) Fail</h3>
+
+<pre><code class="language-go">func (c *Ctx) Fail(code int, err error)
+</code></pre>
+
+<p>Fail is the same as Abort plus an error message.
+Calling <code>c.Fail(500, err)</code> is equivalent to:</p>
+
+<pre><code>c.Error(err, &quot;Failed.&quot;)
+c.Abort(500)
+</code></pre>
+
+<h3 id="toc_21">func (*Ctx) Files</h3>
+
+<pre><code class="language-go">func (c *Ctx) Files() map[string][]*multipart.FileHeader
+</code></pre>
+
+<h3 id="toc_22">func (Ctx) Fmt</h3>
+
+<pre><code class="language-go">func (r Ctx) Fmt() string
+</code></pre>
+
+<h3 id="toc_23">func (*Ctx) Form</h3>
+
+<pre><code class="language-go">func (c *Ctx) Form() url.Values
+</code></pre>
+
+<h3 id="toc_24">func (*Ctx) LastError</h3>
+
+<pre><code class="language-go">func (c *Ctx) LastError() error
+</code></pre>
+
+<p>Returns the last error for the Ctx.</p>
+
+<h3 id="toc_25">func (Ctx) Latency</h3>
+
+<pre><code class="language-go">func (r Ctx) Latency() time.Duration
+</code></pre>
+
+<h3 id="toc_26">func (Ctx) LogFmt</h3>
+
+<pre><code class="language-go">func (r Ctx) LogFmt() string
+</code></pre>
+
+<h3 id="toc_27">func (Ctx) PostProcess</h3>
+
+<pre><code class="language-go">func (r Ctx) PostProcess(req *http.Request, rw ResponseWriter)
+</code></pre>
+
+<h3 id="toc_28">func (*Ctx) Request</h3>
+
+<pre><code class="language-go">func (c *Ctx) Request() *http.Request
+</code></pre>
+
+<h3 id="toc_29">func (Ctx) Requester</h3>
+
+<pre><code class="language-go">func (r Ctx) Requester(req *http.Request)
+</code></pre>
+
+<h3 id="toc_30">func (Ctx) Start</h3>
+
+<pre><code class="language-go">func (r Ctx) Start()
+</code></pre>
+
+<h3 id="toc_31">func (*Ctx) Status</h3>
+
+<pre><code class="language-go">func (c *Ctx) Status(code int)
+</code></pre>
+
+<p>Calls an HttpStatus in the current group by integer code from the Context,
+if the status exists.</p>
+
+<h3 id="toc_32">func (*Ctx) StatusFunc</h3>
+
+<pre><code class="language-go">func (c *Ctx) StatusFunc() (func(int), bool)
+</code></pre>
+
+<h3 id="toc_33">func (Ctx) Stop</h3>
+
+<pre><code class="language-go">func (r Ctx) Stop()
+</code></pre>
+
+<h3 id="toc_34">func (*Ctx) Writer</h3>
+
+<pre><code class="language-go">func (c *Ctx) Writer() ResponseWriter
+</code></pre>
+
+<h2 id="toc_35">type Engine</h2>
+
+<pre><code class="language-go">type Engine struct {
+    *Group
+
+    Logger  *log.Logger
+    Signals Signals
+    Queues  queues
+    // contains filtered or unexported fields
+}
+</code></pre>
+
+<p>Engine is the the core struct with groups, routing, signaling and more.</p>
+
+<h3 id="toc_36">func Basic</h3>
+
+<pre><code class="language-go">func Basic(opts ...Conf) (engine *Engine, err error)
+</code></pre>
+
+<p>Basic produces a new engine with LoggingOn set to true and a default logger.</p>
+
+<h3 id="toc_37">func Empty</h3>
+
+<pre><code class="language-go">func Empty() *Engine
+</code></pre>
+
+<p>Empty returns an empty Engine with zero configuration.</p>
+
+<h3 id="toc_38">func New</h3>
+
+<pre><code class="language-go">func New(opts ...Conf) (engine *Engine, err error)
+</code></pre>
+
+<p>New produces a new engine, with default configuration, a base group, method
+for retrieving a new Ctx, and signalling.</p>
+
+<h3 id="toc_39">func (*Engine) Emit</h3>
+
+<pre><code class="language-go">func (e *Engine) Emit(message string)
+</code></pre>
+
+<p>Emit takes a string that goes as []byte directly to engine.Signals</p>
+
+<h3 id="toc_40">func (*Engine) Handler</h3>
+
+<pre><code class="language-go">func (e *Engine) Handler(method, path string, handler http.Handler)
+</code></pre>
+
+<p>Handler allows the usage of a http.Handler as request manage.</p>
+
+<h3 id="toc_41">func (*Engine) HandlerFunc</h3>
+
+<pre><code class="language-go">func (e *Engine) HandlerFunc(method, path string, handler http.HandlerFunc)
+</code></pre>
+
+<p>HandlerFunc allows the use of a http.HandlerFunc as request manage.</p>
+
+<h3 id="toc_42">func (*Engine) Lookup</h3>
+
+<pre><code class="language-go">func (e *Engine) Lookup(method, path string) (Manage, Params, bool)
+</code></pre>
+
+<p>Lookup allows the manual lookup of a method + path combo.</p>
+
+<h3 id="toc_43">func (*Engine) Manage</h3>
+
+<pre><code class="language-go">func (e *Engine) Manage(method string, path string, m Manage)
+</code></pre>
+
+<p>Registers a new request Manage function with the given path and method.</p>
+
+<h3 id="toc_44">func (*Engine) Message</h3>
+
+<pre><code class="language-go">func (e *Engine) Message(message string)
+</code></pre>
+
+<p>Message goes directly to a logger, if enabled.</p>
+
+<h3 id="toc_45">func (*Engine) PanicMessage</h3>
+
+<pre><code class="language-go">func (e *Engine) PanicMessage(message string)
+</code></pre>
+
+<p>PanicMessage goes to a standard and unavaoidable log, then emits a signal.</p>
+
+<h3 id="toc_46">func (*Engine) Reconfigure</h3>
+
+<pre><code class="language-go">func (e *Engine) Reconfigure(reconfigure func() error) error
+</code></pre>
+
+<h3 id="toc_47">func (*Engine) Run</h3>
+
+<pre><code class="language-go">func (engine *Engine) Run(addr string)
+</code></pre>
+
+<h3 id="toc_48">func (*Engine) Send</h3>
+
+<pre><code class="language-go">func (e *Engine) Send(queue string, message string)
+</code></pre>
+
+<p>Send sends a message to the specified queue.</p>
+
+<h3 id="toc_49">func (*Engine) ServeFiles</h3>
+
+<pre><code class="language-go">func (e *Engine) ServeFiles(path string, root http.FileSystem)
+</code></pre>
+
+<p>ServeFiles serves files from the given file system root. The path must end
+with &ldquo;/*filepath&rdquo;, files are then served from the local path
+/defined/root/dir/*filepath.</p>
+
+<p>e.g., if root is &ldquo;/etc&rdquo; and *filepath is &ldquo;passwd&rdquo;, the local file
+&ldquo;/etc/passwd&rdquo; would be served.</p>
+
+<p>Internally a http.FileServer is used, therefore http.NotFound is used instead
+of the Router&rsquo;s NotFound handler.</p>
+
+<p>To use the operating system&rsquo;s file system implementation,
+use http.Dir:</p>
+
+<pre><code>router.ServeFiles(&quot;/src/*filepath&quot;, http.Dir(&quot;/var/www&quot;))
+</code></pre>
+
+<h3 id="toc_50">func (*Engine) ServeHTTP</h3>
+
+<pre><code class="language-go">func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request)
+</code></pre>
+
+<p>ServeHTTP makes the engine implement the http.Handler interface.</p>
+
+<h3 id="toc_51">func (*Engine) SetConf</h3>
+
+<pre><code class="language-go">func (e *Engine) SetConf(opts ...Conf) error
+</code></pre>
+
+<h3 id="toc_52">func (*Engine) SetConfBool</h3>
+
+<pre><code class="language-go">func (e *Engine) SetConfBool(fieldname string, as bool) error
+</code></pre>
+
+<h3 id="toc_53">func (*Engine) SetConfInt64</h3>
+
+<pre><code class="language-go">func (e *Engine) SetConfInt64(fieldname string, as int64) error
+</code></pre>
+
+<h2 id="toc_54">type EngineError</h2>
+
+<pre><code class="language-go">type EngineError struct {
+    // contains filtered or unexported fields
+}
+</code></pre>
+
+<h3 id="toc_55">func (*EngineError) Error</h3>
+
+<pre><code class="language-go">func (e *EngineError) Error() string
+</code></pre>
+
+<h2 id="toc_56">type Group</h2>
+
+<pre><code class="language-go">type Group struct {
+    HttpStatuses
+    // contains filtered or unexported fields
+}
+</code></pre>
+
+<h3 id="toc_57">func NewGroup</h3>
+
+<pre><code class="language-go">func NewGroup(prefix string, engine *Engine) *Group
+</code></pre>
+
+<p>NewGroup creates a group with no parent and the provided prefix.</p>
+
+<h3 id="toc_58">func (*Group) New</h3>
+
+<pre><code class="language-go">func (group *Group) New(component string) *Group
+</code></pre>
+
+<p>New creates a group from an existing group using the the groups prefix and
+the provided component string as a prefix. The existing group will be the
+parent of the new group.</p>
+
+<h3 id="toc_59">func (*Group) Take</h3>
+
+<pre><code class="language-go">func (group *Group) Take(route string, method string, handler func(context.Context))
+</code></pre>
+
+<p>Handle provides a route, method, and Manage to the router, and creates
+a function using the handler when the router matches the route and method.</p>
+
+<h3 id="toc_60">func (*Group) TakeStatus</h3>
+
+<pre><code class="language-go">func (group *Group) TakeStatus(code int, statushandler func(context.Context))
+</code></pre>
+
+<h2 id="toc_61">type HttpStatus</h2>
+
+<pre><code class="language-go">type HttpStatus struct {
+    Code     int
+    Message  string
+    Handlers []Manage
+}
+</code></pre>
+
+<p>Status code, message, and Manage handlers for a http status.</p>
+
+<h3 id="toc_62">func NewHttpStatus</h3>
+
+<pre><code class="language-go">func NewHttpStatus(code int, message string) *HttpStatus
+</code></pre>
+
+<p>Create new HttpStatus with the code, message, and default Manage handlers.</p>
+
+<h3 id="toc_63">func (*HttpStatus) Update</h3>
+
+<pre><code class="language-go">func (h *HttpStatus) Update(handlers ...Manage)
+</code></pre>
+
+<p>Adds any number of custom Manage to the HttpStatus, between the
+default status before &amp; after manage.</p>
+
+<h2 id="toc_64">type HttpStatuses</h2>
+
+<pre><code class="language-go">type HttpStatuses map[int]*HttpStatus
+</code></pre>
+
+<p>A map of HttpStatus instances, keyed by status code</p>
+
+<h3 id="toc_65">func (HttpStatuses) New</h3>
+
+<pre><code class="language-go">func (hs HttpStatuses) New(h *HttpStatus)
+</code></pre>
+
+<p>New adds a new HttpStatus to HttpStatuses keyed by status code.</p>
+
+<h2 id="toc_66">type Manage</h2>
+
+<pre><code class="language-go">type Manage func(context.Context)
+</code></pre>
+
+<p>Manage is a function that can be registered to a route to handle HTTP
+requests. Like http.HandlerFunc, but takes a context.Context</p>
+
+<h2 id="toc_67">type Param</h2>
+
+<pre><code class="language-go">type Param struct {
+    Key   string
+    Value string
+}
+</code></pre>
+
+<p>Param is a single URL parameter, consisting of a key and a value.</p>
+
+<h2 id="toc_68">type Params</h2>
+
+<pre><code class="language-go">type Params []Param
+</code></pre>
+
+<p>Params is a Param-slice, as returned by the router. The slice is ordered,
+the first URL parameter is also the first slice value. It is safe to read
+values by the index.</p>
+
+<h3 id="toc_69">func (Params) ByName</h3>
+
+<pre><code class="language-go">func (ps Params) ByName(name string) string
+</code></pre>
+
+<p>ByName returns the value of the first Param which key matches the given name.
+If no matching Param is found, an empty string is returned.</p>
+
+<h2 id="toc_70">type ResponseWriter</h2>
+
+<pre><code class="language-go">type ResponseWriter interface {
+    http.ResponseWriter
+    http.Hijacker
+    http.Flusher
+    http.CloseNotifier
+
+    Status() int
+    Size() int
+    Written() bool
+    WriteHeaderNow()
+}
+</code></pre>
+
+<h2 id="toc_71">type Signal</h2>
+
+<pre><code class="language-go">type Signal []byte
+</code></pre>
+
+<p>Signal denotes a byte signal</p>
+
+<h2 id="toc_72">type Signals</h2>
+
+<pre><code class="language-go">type Signals chan Signal
+</code></pre>
+
+<p>Signals is a channel for Signal</p>
+
+            </div>
+        </div>
+    </body>
+</html>
