@@ -10,7 +10,7 @@ import (
 
 func testCallException(code int, t *testing.T) {
 	e, _ := New()
-	e.Handle("/test", "GET", func(c context.Context) { currentCtx(c).Status(code) })
+	e.Take("/test", "GET", func(c context.Context) { currentCtx(c).Status(code) })
 
 	w := PerformRequest(e, "GET", "/test")
 
@@ -30,7 +30,7 @@ func testCustomException(code int, t *testing.T) {
 	e, _ := New()
 	e.HttpStatuses[code].Update(func(c context.Context) { currentCtx(c).RW.Write([]byte(expected)) })
 
-	e.Handle("/test", "GET", func(c context.Context) { currentCtx(c).Status(code) })
+	e.Take("/test", "GET", func(c context.Context) { currentCtx(c).Status(code) })
 
 	w := PerformRequest(e, "GET", "/test")
 

@@ -51,10 +51,20 @@ func (group *Group) New(component string) *Group {
 
 // Handle provides a route, method, and Manage to the router, and creates
 // a function using the handler when the router matches the route and method.
-func (group *Group) Handle(route string, method string, handler func(context.Context)) {
+func (group *Group) Take(route string, method string, handler func(context.Context)) {
 	group.engine.Manage(method, group.pathFor(route), func(c context.Context) {
 		curr := currentCtx(c)
 		curr.group = group
 		handler(context.WithValue(c, "Current", curr))
 	})
+}
+
+func (group *Group) TakeStatus(code int, statushandler func(context.Context)) {
+	if ss, ok := group.HttpStatuses[code]; ok {
+		ss.Update(statushandler)
+	} else {
+		ns := NewHttpStatus(code, string(code))
+		ns.Update(statushandler)
+		group.HttpStatuses.New(ns)
+	}
 }

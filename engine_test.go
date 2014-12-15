@@ -2,6 +2,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -31,7 +32,10 @@ func testRouteOK(method string, t *testing.T) {
 	passed := false
 	e, _ := Basic()
 
-	e.Handle("/test", method, func(c context.Context) { passed = true })
+	e.Take("/test", method, func(c context.Context) {
+		passed = true
+		fmt.Printf("%+v\n", c)
+	})
 
 	w := PerformRequest(e, method, "/test")
 
@@ -56,7 +60,7 @@ func testGroupOK(method string, t *testing.T) {
 	passed := false
 	e, _ := Basic()
 
-	e.Handle("/test_group", method, func(c context.Context) { passed = true })
+	e.Take("/test_group", method, func(c context.Context) { passed = true })
 
 	w := PerformRequest(e, method, "/test_group")
 
@@ -81,7 +85,7 @@ func testSubGroupOK(method string, t *testing.T) {
 	passed := false
 	e, _ := Basic()
 	g := e.New("/test_group")
-	g.Handle("/test_group_subgroup", method, func(c context.Context) { passed = true })
+	g.Take("/test_group_subgroup", method, func(c context.Context) { passed = true })
 
 	w := PerformRequest(e, method, "/test_group/test_group_subgroup")
 
@@ -106,7 +110,7 @@ func testRouteNotOK(method string, t *testing.T) {
 	passed := false
 	e, _ := Basic()
 	othermethod := methodNotMethod(method)
-	e.Handle("/test_not_ok", othermethod, func(c context.Context) { passed = true })
+	e.Take("/test_not_ok", othermethod, func(c context.Context) { passed = true })
 	w := PerformRequest(e, method, "/test_not_ok")
 
 	if passed == true {
