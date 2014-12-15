@@ -1,10 +1,11 @@
 ##Changelog
 
-###Engine 0.2.0 (12.11.2014)
+###Engine 0.2.0 (12.15.2014)
 
 - file uploading
 - clearer signals with less verbose calls
 - net/context integration
+- changes toward a more composable default engine & engine toolkit for flotilla
 
 ###Engine 0.1.0 (10.17.2014)
 
