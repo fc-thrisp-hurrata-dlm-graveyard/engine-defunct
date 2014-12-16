@@ -2,6 +2,7 @@ Engine
 ======
 [![GoDoc](https://godoc.org/github.com/thrisp/engine?status.png)](https://godoc.org/github.com/thrisp/engine)
 [![Build Status](https://travis-ci.org/thrisp/engine.svg?branch=develop)](https://travis-ci.org/thrisp/engine)
+[![Coverage Status](https://coveralls.io/repos/thrisp/engine/badge.png?branch=master)](https://coveralls.io/r/thrisp/engine?branch=master)
 [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/thrisp/engine/master/LICENSE)
 
 

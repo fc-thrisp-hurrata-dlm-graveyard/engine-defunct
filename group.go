@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"net/http"
 	"path/filepath"
 
 	"golang.org/x/net/context"
@@ -10,9 +11,10 @@ type (
 	groups map[string]*Group
 
 	Group struct {
-		prefix string
-		parent *Group
-		engine *Engine
+		prefix     string
+		parent     *Group
+		engine     *Engine
+		middleware []http.HandlerFunc
 		HttpStatuses
 	}
 )
@@ -49,12 +51,23 @@ func (group *Group) New(component string) *Group {
 	return newgroup
 }
 
+func (group *Group) Middleware(h ...http.HandlerFunc) {
+	group.middleware = append(group.middleware, h...)
+}
+
+func (group *Group) events(c *Ctx) {
+	for _, h := range group.middleware {
+		h(c.RW, c.request)
+	}
+}
+
 // Handle provides a route, method, and Manage to the router, and creates
 // a function using the handler when the router matches the route and method.
 func (group *Group) Take(route string, method string, handler func(context.Context)) {
 	group.engine.Manage(method, group.pathFor(route), func(c context.Context) {
 		curr := currentCtx(c)
 		curr.group = group
+		group.events(curr)
 		handler(context.WithValue(c, "Current", curr))
 	})
 }
