@@ -338,3 +338,32 @@ func TestRouterServeFiles(t *testing.T) {
 		t.Error("serving file failed")
 	}
 }
+
+func testMiddleware(method string, t *testing.T) {
+	passed := false
+
+	e, _ := Basic()
+
+	e.Take("/test_middleware", method, func(c context.Context) {})
+
+	e.Middleware(func(http.ResponseWriter, *http.Request) { passed = true })
+
+	w := PerformRequest(e, method, "/test_middleware")
+
+	if passed == false {
+		t.Errorf(method + " group route handler was not invoked.")
+	}
+	if w.Code != http.StatusOK {
+		t.Errorf("Status code should be %v, was %d", http.StatusOK, w.Code)
+	}
+
+}
+
+func TestMiddleware(t *testing.T) {
+	testMiddleware("POST", t)
+	testMiddleware("DELETE", t)
+	testMiddleware("PATCH", t)
+	testMiddleware("PUT", t)
+	testMiddleware("OPTIONS", t)
+	testMiddleware("HEAD", t)
+}
