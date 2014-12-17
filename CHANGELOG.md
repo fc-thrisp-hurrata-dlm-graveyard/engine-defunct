@@ -1,5 +1,10 @@
 ##Changelog
 
+###Engine 0.2.1 (12.18.2014)
+
+- update travis.yml to accomodate path changes for go coverage package
+- group based, http.HandlerFunc signature middleware
+
 ###Engine 0.2.0 (12.15.2014)
 
 - file uploading
