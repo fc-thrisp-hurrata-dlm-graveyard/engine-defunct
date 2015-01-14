@@ -175,7 +175,7 @@ func (engine *Engine) srvhttp(w http.ResponseWriter, req *http.Request, c contex
 			}
 
 			if tsr && engine.RedirectTrailingSlash {
-				if path[len(path)-1] == '/' {
+				if len(path) > 1 && path[len(path)-1] == '/' {
 					req.URL.Path = path[:len(path)-1]
 				} else {
 					req.URL.Path = path + "/"
